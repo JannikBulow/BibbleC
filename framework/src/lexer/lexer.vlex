@@ -3,8 +3,28 @@ tokens bibblec {
     )
     {
     _right_brace
-    [
-    ]
 
     ;
+
+    +
+    -
+    *
+    /
+    %
+
+    _identifier
+    _integer_literal
+    _string_literal
+    _character_literal
+
+    void Type
+    byte Type
+    short Type
+    int Type
+    long Type
+}
+
+comments {
+    //
+    /* close */
 }
