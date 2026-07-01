@@ -58,4 +58,5 @@ target_link_libraries(BibbleC-framework-static BibblIR-framework-static)
 set_target_properties(BibbleC-framework-shared PROPERTIES OUTPUT_NAME "bibblec-backend")
 set_target_properties(BibbleC-framework-static PROPERTIES OUTPUT_NAME "bibblec-backend-aio")
 
+#TODO: vlex export api support
 vlex_generate(BibbleC-framework-shared src/lexer/lexer.vlex src/lexer include/BibbleC/lexer)
