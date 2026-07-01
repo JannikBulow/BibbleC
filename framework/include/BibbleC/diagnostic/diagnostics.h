@@ -27,7 +27,7 @@ namespace bibblec {
 
     namespace diagnostic {
         constexpr std::array KNOWN_WARNINGS = {
-            ""
+            "implicit"
         };
 
         class BIBBLEC_EXPORT Diagnostics {
