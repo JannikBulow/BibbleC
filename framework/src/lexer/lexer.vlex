@@ -1,0 +1,10 @@
+tokens bibblec {
+    (
+    )
+    {
+    _right_brace
+    [
+    ]
+
+    ;
+}
