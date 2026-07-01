@@ -27,6 +27,8 @@ set(HEADERS
     include/BibbleC/scope/scope.h
 
     include/BibbleC/type/type.h
+
+    include/BibbleC/util/better_strings.h
 )
 
 source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${SOURCES} ${HEADERS})
