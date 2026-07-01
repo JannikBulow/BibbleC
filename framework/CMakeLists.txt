@@ -16,11 +16,11 @@ FetchContent_Declare(vlex
 FetchContent_MakeAvailable(vlex)
 
 set(SOURCES
-    src/diagnostic/diagnostic.cpp
+    src/diagnostic/diagnostics.cpp
 )
 
 set(HEADERS
-    include/BibbleC/diagnostic/diagnostic.h
+    include/BibbleC/diagnostic/diagnostics.h
 
     include/BibbleC/util/better_strings.h
 )
