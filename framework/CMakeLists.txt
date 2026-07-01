@@ -23,6 +23,8 @@ set(HEADERS
     include/BibbleC/diagnostic/diagnostics.h
 
     include/BibbleC/util/better_strings.h
+
+    include/BibbleC/type/type.h
 )
 
 source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${SOURCES} ${HEADERS})
