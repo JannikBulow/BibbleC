@@ -3,6 +3,8 @@
 #ifndef BIBBLEC_DIAGNOSTIC_DIAGNOSTICS_H
 #define BIBBLEC_DIAGNOSTIC_DIAGNOSTICS_H
 
+#include "BibbleC/debug/source_pair.h"
+
 #include "BibbleC/lexer/SourceLocation.h"
 
 #include "BibbleC/util/better_strings.h"
@@ -39,7 +41,9 @@ namespace bibblec {
             [[noreturn]] void fatalError(std::string_view message);
 
             void reportCompilerError(lexer::SourceLocation start, lexer::SourceLocation end, std::string_view message);
+            void reportCompilerError(const SourcePair& source, std::string_view message) { reportCompilerError(source.start, source.end, message); }
             void reportCompilerWarning(lexer::SourceLocation start, lexer::SourceLocation end, std::string_view warning, std::string_view message);
+            void reportCompilerWarning(const SourcePair& source, std::string_view warning, std::string_view message) { reportCompilerWarning(source.start, source.end, warning, message); }
 
         private:
             std::ostream& mErrorStream;
