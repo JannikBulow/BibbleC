@@ -17,12 +17,18 @@ FetchContent_MakeAvailable(vlex)
 
 set(SOURCES
     src/diagnostic/diagnostics.cpp
+
+    src/parser/ast/node.cpp
 )
 
 set(HEADERS
     include/BibbleC/debug/source_pair.h
 
     include/BibbleC/diagnostic/diagnostics.h
+
+    include/BibbleC/parser/ast/node.h
+
+    include/BibbleC/parser/parser.h
 
     include/BibbleC/scope/scope.h
 
