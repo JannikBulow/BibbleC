@@ -21,6 +21,8 @@ set(SOURCES
 
 set(HEADERS
     include/BibbleC/diagnostic/diagnostic.h
+
+    include/BibbleC/util/better_strings.h
 )
 
 source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${SOURCES} ${HEADERS})
