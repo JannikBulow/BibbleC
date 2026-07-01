@@ -24,7 +24,7 @@ set(HEADERS
 
     include/BibbleC/diagnostic/diagnostics.h
 
-    include/BibbleC/util/better_strings.h
+    include/BibbleC/scope/scope.h
 
     include/BibbleC/type/type.h
 )
