@@ -20,6 +20,8 @@ set(SOURCES
 )
 
 set(HEADERS
+    include/BibbleC/debug/source_pair.h
+
     include/BibbleC/diagnostic/diagnostics.h
 
     include/BibbleC/util/better_strings.h
