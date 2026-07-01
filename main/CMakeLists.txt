@@ -15,6 +15,8 @@ target_include_directories(BibbleC-main PUBLIC include)
 
 target_compile_features(BibbleC-main PUBLIC cxx_std_20)
 
+target_link_libraries(BibbleC-main PRIVATE BibbleC-compiler-shared)
+
 set_target_properties(BibbleC-main PROPERTIES OUTPUT_NAME "bibblec")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
