@@ -32,6 +32,8 @@ namespace bibblec::parser {
         Operator mOperator;
         lexer::Token mOperatorToken;
     };
+
+    using BinaryExpressionPtr = std::unique_ptr<BinaryExpression>;
 }
 
 #endif //BIBBLEC_PARSER_AST_EXPRESSION_BINARY_EXPRESSION_H
