@@ -115,6 +115,12 @@ namespace bibblec::parser {
 
     ASTNodePtr Parser::parsePrimary() {
         switch (current().getTokenType()) {
+            case lexer::TokenType::IntegerLiteral:
+                return parseIntegerLiteral();
+
+            case lexer::TokenType::CharacterLiteral:
+                return parseCharacterLiteral();
+
             case lexer::TokenType::LeftParen:
                 return parseParenthesizedExpression();
 
@@ -138,5 +144,19 @@ namespace bibblec::parser {
         consume();
 
         return expression;
+    }
+
+    IntegerLiteralPtr Parser::parseIntegerLiteral() {
+        SourcePair source(current().getStartLocation(), current().getEndLocation());
+        std::string text(consume().getText());
+        uintmax_t value = std::stoull(text, nullptr, 0);
+        return std::make_unique<IntegerLiteral>(mActiveScope, value, Type::Get("int"), source);
+    }
+
+    IntegerLiteralPtr Parser::parseCharacterLiteral() {
+        SourcePair source(current().getStartLocation(), current().getEndLocation());
+        std::string text(consume().getText());
+        char value = text[0];
+        return std::make_unique<IntegerLiteral>(mActiveScope, value, Type::Get("char"), source);
     }
 }

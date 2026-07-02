@@ -8,6 +8,7 @@
 #include "BibbleC/lexer/Token.h"
 
 #include "BibbleC/parser/ast/expression/binary_expression.h"
+#include "BibbleC/parser/ast/expression/integer_literal.h"
 
 #include "BibbleC/parser/ast/node.h"
 
@@ -47,6 +48,9 @@ namespace bibblec::parser {
         ASTNodePtr parseExpression(int precedence = 1);
         ASTNodePtr parsePrimary();
         ASTNodePtr parseParenthesizedExpression();
+
+        IntegerLiteralPtr parseIntegerLiteral();
+        IntegerLiteralPtr parseCharacterLiteral();
     };
 }
 
