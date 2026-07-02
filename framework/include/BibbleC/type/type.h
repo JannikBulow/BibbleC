@@ -20,6 +20,7 @@ namespace bibblec {
         };
 
         explicit Type(std::string name) : mName(std::move(name)) {}
+        virtual ~Type() = default;
 
         std::string_view getName() const { return mName; }
 
