@@ -19,6 +19,8 @@ set(SOURCES
     src/diagnostic/diagnostics.cpp
 
     src/parser/ast/node.cpp
+
+    src/type/integer_type.cpp
 )
 
 set(HEADERS
@@ -32,6 +34,7 @@ set(HEADERS
 
     include/BibbleC/scope/scope.h
 
+    include/BibbleC/type/integer_type.h
     include/BibbleC/type/type.h
 
     include/BibbleC/util/better_strings.h
