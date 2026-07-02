@@ -8,7 +8,7 @@
 
 namespace bibblec::parser {
     BinaryExpression::BinaryExpression(scope::Scope* scope, ASTNodePtr left, lexer::Token operatorToken, ASTNodePtr right, SourcePair source)
-        : ASTNode(scope, source)
+        : ASTNode(scope, std::move(source))
         , mLeft(std::move(left))
         , mRight(std::move(right))
         , mOperatorToken(std::move(operatorToken)) {

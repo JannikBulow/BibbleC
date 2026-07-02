@@ -22,6 +22,8 @@ set(SOURCES
 
     src/parser/ast/node.cpp
 
+    src/parser/parser.cpp
+
     src/type/integer_type.cpp
 )
 
