@@ -18,6 +18,8 @@ FetchContent_MakeAvailable(vlex)
 set(SOURCES
     src/diagnostic/diagnostics.cpp
 
+    src/parser/ast/expression/binary_expression.cpp
+
     src/parser/ast/node.cpp
 
     src/type/integer_type.cpp
@@ -27,6 +29,8 @@ set(HEADERS
     include/BibbleC/debug/source_pair.h
 
     include/BibbleC/diagnostic/diagnostics.h
+
+    include/BibbleC/parser/ast/expression/binary_expression.h
 
     include/BibbleC/parser/ast/node.h
 

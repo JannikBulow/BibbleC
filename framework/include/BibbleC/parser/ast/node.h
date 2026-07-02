@@ -22,7 +22,9 @@
 
 namespace bibblec::parser {
     class BIBBLEC_EXPORT ASTNode {
+    protected:
         using ASTNodePtr = std::unique_ptr<ASTNode>;
+
     public:
         ASTNode(scope::Scope* scope, SourcePair source, Type* type = nullptr)
             : mScope(scope)
@@ -34,12 +36,12 @@ namespace bibblec::parser {
         Type* getType() const { return mType; }
         const SourcePair& getSource() const { return mSource; }
 
-        virtual std::vector<ASTNodePtr> getChildren() { return {}; }
+        virtual std::vector<ASTNode*> getChildren() { return {}; }
 
         virtual ASTNodePtr cloneExternal(scope::Scope* in) { return nullptr; }
 
         virtual bibblir::Value* codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) = 0;
-        virtual void setEmittedValue(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) = 0;
+        virtual void setEmittedValue(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {};
 
         virtual void typeCheck(diagnostic::Diagnostics& diag, bool& exit) = 0;
         virtual bool triviallyImplicitCast(diagnostic::Diagnostics& diag, Type* destType) { return false; }
@@ -48,7 +50,7 @@ namespace bibblec::parser {
         // can't be a member because one path does return std::move(node)
         static ASTNodePtr CastTo(ASTNodePtr& node, Type* destType);
 
-    private:
+    protected:
         scope::Scope* mScope;
         SourcePair mSource;
         Type* mType;
