@@ -10,6 +10,8 @@
 #include "BibbleC/parser/ast/expression/binary_expression.h"
 #include "BibbleC/parser/ast/expression/integer_literal.h"
 
+#include "BibbleC/parser/ast/statement/return_statement.h"
+
 #include "BibbleC/parser/ast/node.h"
 
 #include "BibbleC/scope/scope.h"
@@ -48,6 +50,8 @@ namespace bibblec::parser {
         ASTNodePtr parseExpression(int precedence = 1);
         ASTNodePtr parsePrimary();
         ASTNodePtr parseParenthesizedExpression();
+
+        ReturnStatementPtr parseReturnStatement();
 
         IntegerLiteralPtr parseIntegerLiteral();
         IntegerLiteralPtr parseCharacterLiteral();

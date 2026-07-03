@@ -115,6 +115,10 @@ namespace bibblec::parser {
 
     ASTNodePtr Parser::parsePrimary() {
         switch (current().getTokenType()) {
+            case lexer::TokenType::ReturnKeyword:
+                return parseReturnStatement();
+
+
             case lexer::TokenType::IntegerLiteral:
                 return parseIntegerLiteral();
 
@@ -144,6 +148,22 @@ namespace bibblec::parser {
         consume();
 
         return expression;
+    }
+
+    ReturnStatementPtr Parser::parseReturnStatement() {
+        SourcePair source;
+        source.start = consume().getStartLocation();
+
+        if (current().getTokenType() == lexer::TokenType::Semicolon) {
+            source.end = peek(-1).getEndLocation();
+            return std::make_unique<ReturnStatement>(mActiveScope, nullptr, source);
+        }
+
+        ASTNodePtr returnValue = parseExpression();
+
+        source.end = peek(-1).getEndLocation();
+
+        return std::make_unique<ReturnStatement>(mActiveScope, std::move(returnValue), source);
     }
 
     IntegerLiteralPtr Parser::parseIntegerLiteral() {
