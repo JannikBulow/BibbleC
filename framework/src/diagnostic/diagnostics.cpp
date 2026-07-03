@@ -13,7 +13,7 @@ namespace bibblec::diagnostic {
         std::ranges::copy(KNOWN_WARNINGS, std::back_inserter(mWarnings));
     }
 
-    void Diagnostics::setText(std::string path, std::string_view text) {
+    void Diagnostics::addText(std::string path, std::string_view text) {
         mTexts[std::move(path)] = text;
     }
 

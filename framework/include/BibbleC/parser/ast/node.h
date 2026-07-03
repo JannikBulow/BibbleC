@@ -21,10 +21,10 @@
 #include <vector>
 
 namespace bibblec::parser {
-    class BIBBLEC_EXPORT ASTNode {
-    protected:
-        using ASTNodePtr = std::unique_ptr<ASTNode>;
+    class ASTNode;
+    using ASTNodePtr = std::unique_ptr<ASTNode>;
 
+    class BIBBLEC_EXPORT ASTNode {
     public:
         ASTNode(scope::Scope* scope, SourcePair source, Type* type = nullptr)
             : mScope(scope)
@@ -55,8 +55,6 @@ namespace bibblec::parser {
         SourcePair mSource;
         Type* mType;
     };
-
-    using ASTNodePtr = std::unique_ptr<ASTNode>;
 }
 
 #endif //BIBBLEC_PARSER_AST_NODE_H

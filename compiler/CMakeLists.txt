@@ -4,10 +4,12 @@ include(FetchContent)
 include(GenerateExportHeader)
 
 set(SOURCES
-    src/s.cpp
+    src/compiler.cpp
 )
 
 set(HEADERS
+    include/BibbleC/compiler.h
+    include/BibbleC/module.h
 )
 
 source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${SOURCES} ${HEADERS})
@@ -16,13 +18,13 @@ add_library(BibbleC-compiler-shared SHARED ${SOURCES} ${HEADERS})
 add_library(BibbleC-compiler-static STATIC ${SOURCES} ${HEADERS})
 
 generate_export_header(BibbleC-compiler-shared
-    EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/BibbleC/api.h
-    EXPORT_MACRO_NAME BIBBLEC_EXPORT
-    NO_EXPORT_MACRO_NAME BIBBLEC_NO_EXPORT
-    STATIC_DEFINE BIBBLEC_STATIC_DEFINE
+    EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/BibbleC/api2.h
+    EXPORT_MACRO_NAME BIBBLE_EXPORT
+    NO_EXPORT_MACRO_NAME BIBBLE_NO_EXPORT
+    STATIC_DEFINE BIBBLE_STATIC_DEFINE
 )
 
-target_compile_definitions(BibbleC-compiler-static PUBLIC BIBBLEC_STATIC_DEFINE)
+target_compile_definitions(BibbleC-compiler-static PUBLIC BIBBLE_STATIC_DEFINE)
 
 target_include_directories(BibbleC-compiler-shared PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>

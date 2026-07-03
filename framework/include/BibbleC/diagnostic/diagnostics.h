@@ -34,7 +34,7 @@ namespace bibblec {
         public:
             Diagnostics(std::ostream& errorStream, std::ostream& warningStream);
 
-            void setText(std::string path, std::string_view text);
+            void addText(std::string path, std::string_view text);
             void setWarning(std::string_view warning, bool enable);
             void disableAllWarnings();
 
