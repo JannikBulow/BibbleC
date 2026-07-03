@@ -32,6 +32,7 @@ set(SOURCES
     src/scope/scope.cpp
     src/scope/symbol.cpp
 
+    src/type/error_type.cpp
     src/type/function_type.cpp
     src/type/integer_type.cpp
     src/type/type.cpp
@@ -56,6 +57,7 @@ set(HEADERS
     include/BibbleC/scope/scope.h
     include/BibbleC/scope/symbol.h
 
+    include/BibbleC/type/error_type.h
     include/BibbleC/type/function_type.h
     include/BibbleC/type/integer_type.h
     include/BibbleC/type/type.h
