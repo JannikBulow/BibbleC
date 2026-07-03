@@ -37,6 +37,7 @@ namespace bibblec {
         virtual bool isFunctionType() const { return false; }
 
         static void Init();
+        static void AddAlias(std::string name, Type* type);
         static bool Exists(std::string_view name);
         static Type* Get(std::string_view name);
         static void Reset();

@@ -31,6 +31,7 @@ set(SOURCES
 
     src/type/function_type.cpp
     src/type/integer_type.cpp
+    src/type/type.cpp
 )
 
 set(HEADERS
