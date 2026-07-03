@@ -57,7 +57,7 @@ namespace bibblec::parser {
                     return builder.createUDiv(left, right);
                 }
 
-                diag.reportCompilerError(mSource, "Can't divide a non-integer type");
+                diag.reportCompilerError(mSource, "can't divide a non-integer type");
                 std::exit(1);
             case Mod:
                 if (mType->isIntegerType()) {
@@ -67,7 +67,7 @@ namespace bibblec::parser {
                     return builder.createUMod(left, right);
                 }
 
-                diag.reportCompilerError(mSource, "Can't divide a non-integer type"); // this probably shouldn't say divide, but idk what the verb for modulo is
+                diag.reportCompilerError(mSource, "can't divide a non-integer type"); // this probably shouldn't say divide, but idk what the verb for modulo is
                 std::exit(1);
         }
 
@@ -97,7 +97,7 @@ namespace bibblec::parser {
                 }
                 if (mLeft->getType() != mRight->getType() || !mLeft->getType()->isIntegerType()) {
                     diag.reportCompilerError(mSource,
-                        std::format("No match for '{}operator{}{}' with types '{}{}{}' and '{}{}{}'",
+                        std::format("no match for '{}operator{}{}' with types '{}{}{}' and '{}{}{}'",
                             fmt::bold, mOperatorToken.getName(), fmt::reset,
                             fmt::bold, mLeft->getType()->getName(), fmt::reset,
                             fmt::bold, mRight->getType()->getName(), fmt::reset)
