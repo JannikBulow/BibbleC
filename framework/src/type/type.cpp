@@ -4,6 +4,7 @@
 #include "BibbleC/type/function_type.h"
 #include "BibbleC/type/integer_type.h"
 #include "BibbleC/type/type.h"
+#include "BibbleC/type/void_type.h"
 
 #include "BibbleC/util/better_strings.h"
 
@@ -23,6 +24,8 @@ namespace bibblec {
         types["ushort"] = std::make_unique<IntegerType>(IntegerType::Short, false);
         types["uint"] = std::make_unique<IntegerType>(IntegerType::Int, false);
         types["ulong"] = std::make_unique<IntegerType>(IntegerType::Long, false);
+
+        types["void"] = std::make_unique<VoidType>();
 
         types["error-type"] = std::make_unique<ErrorType>();
 

@@ -37,6 +37,7 @@ set(SOURCES
     src/type/function_type.cpp
     src/type/integer_type.cpp
     src/type/type.cpp
+    src/type/void_type.cpp
 )
 
 set(HEADERS
@@ -63,6 +64,7 @@ set(HEADERS
     include/BibbleC/type/function_type.h
     include/BibbleC/type/integer_type.h
     include/BibbleC/type/type.h
+    include/BibbleC/type/void_type.h
 
     include/BibbleC/util/better_strings.h
 )
