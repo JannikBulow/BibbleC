@@ -63,7 +63,7 @@ namespace bibblec {
     }
 
     void Compiler::parseModuleName(Module& module) {
-        module.name = module.path.filename().string();
+        module.name = module.path.filename().replace_extension("").string();
     }
 
     void Compiler::parse(Module& module) {
