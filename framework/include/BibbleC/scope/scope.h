@@ -3,6 +3,8 @@
 #ifndef BIBBLEC_SCOPE_SCOPE_H
 #define BIBBLEC_SCOPE_SCOPE_H
 
+#include "BibbleC/scope/symbol.h"
+
 #include "BibbleC/type/type.h"
 
 #include "BibbleC/api.h"
@@ -13,6 +15,11 @@ namespace bibblec::scope {
         explicit Scope(Scope* parent = nullptr);
 
         Scope* getParent() const;
+        const std::vector<Scope*>& getChildren() const;
+
+        Symbol* resolveSymbol(std::string_view name) const;
+        std::vector<Symbol*> getCandidateFunctions(std::string_view name) const;
+        void addSymbol(SymbolPtr symbol);
 
         Type* getCurrentReturnType() const;
         void setCurrentReturnType(Type* type);
@@ -36,6 +43,9 @@ namespace bibblec::scope {
         using ConstIterator = BaseIterator<const Scope>;
 
         Scope* mParent;
+        std::vector<Scope*> mChildren;
+
+        std::vector<SymbolPtr> mSymbols;
 
         Type* mCurrentReturnType = nullptr;
 
