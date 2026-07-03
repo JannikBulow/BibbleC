@@ -29,6 +29,7 @@ set(SOURCES
 
     src/scope/scope.cpp
 
+    src/type/function_type.cpp
     src/type/integer_type.cpp
 )
 
@@ -48,6 +49,7 @@ set(HEADERS
 
     include/BibbleC/scope/scope.h
 
+    include/BibbleC/type/function_type.h
     include/BibbleC/type/integer_type.h
     include/BibbleC/type/type.h
 
