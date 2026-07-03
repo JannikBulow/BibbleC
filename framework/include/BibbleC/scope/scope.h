@@ -44,6 +44,8 @@ namespace bibblec::scope {
         ConstIterator begin() const { return this; }
         ConstIterator end() const { return nullptr; }
     };
+
+    using ScopePtr = std::unique_ptr<Scope>;
 }
 
 #endif //BIBBLEC_SCOPE_SCOPE_H
