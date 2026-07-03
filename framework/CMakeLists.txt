@@ -25,6 +25,8 @@ set(SOURCES
 
     src/parser/parser.cpp
 
+    src/scope/scope.cpp
+
     src/type/integer_type.cpp
 )
 
