@@ -6,7 +6,7 @@
 #include "BibbleC/type/type.h"
 
 namespace bibblec {
-    class ErrorType : public Type {
+    class BIBBLEC_EXPORT ErrorType : public Type {
     public:
         ErrorType();
 
