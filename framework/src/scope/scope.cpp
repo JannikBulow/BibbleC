@@ -16,6 +16,10 @@ namespace bibblec::scope {
         return mChildren;
     }
 
+    Symbol* Scope::getLatestSymbol() const {
+        return mSymbols.back().get();
+    }
+
     Symbol* Scope::resolveSymbol(std::string_view name) const {
         for (const Scope& scope : *this) {
             auto it = std::ranges::find_if(scope.mSymbols, [name](const SymbolPtr& symbol) {
