@@ -9,6 +9,7 @@
 
 #include "BibbleC/parser/ast/expression/binary_expression.h"
 #include "BibbleC/parser/ast/expression/integer_literal.h"
+#include "BibbleC/parser/ast/expression/unary_expression.h"
 
 #include "BibbleC/parser/ast/global/function.h"
 

@@ -126,9 +126,9 @@ namespace bibblec::parser {
         int unaryOperatorPrecedence = getBinaryOperatorPrecedence(current().getTokenType());
         if (unaryOperatorPrecedence >= precedence) {
             lexer::Token operatorToken = consume();
-            auto operand = parseExpression(unaryOperatorPrecedence);
+            ASTNodePtr operand = parseExpression(unaryOperatorPrecedence);
             source.end = peek(-1).getEndLocation();
-            //TODO: left = unary expr
+            left = std::make_unique<UnaryExpression>(mActiveScope, std::move(operand), std::move(operatorToken), source);
         } else {
             left = parsePrimary();
         }
