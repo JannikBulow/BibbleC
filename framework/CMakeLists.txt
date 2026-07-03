@@ -21,6 +21,8 @@ set(SOURCES
     src/parser/ast/expression/binary_expression.cpp
     src/parser/ast/expression/integer_literal.cpp
 
+    src/parser/ast/statement/return_statement.cpp
+
     src/parser/ast/node.cpp
 
     src/parser/parser.cpp
@@ -37,6 +39,8 @@ set(HEADERS
 
     include/BibbleC/parser/ast/expression/binary_expression.h
     include/BibbleC/parser/ast/expression/integer_literal.h
+
+    include/BibbleC/parser/ast/statement/return_statement.h
 
     include/BibbleC/parser/ast/node.h
 
