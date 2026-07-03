@@ -17,6 +17,8 @@ tokens bibblec {
     _string_literal
     _character_literal
 
+    return
+
     void Type
     byte Type
     short Type
