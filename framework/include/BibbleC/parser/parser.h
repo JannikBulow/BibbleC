@@ -10,6 +10,8 @@
 #include "BibbleC/parser/ast/expression/binary_expression.h"
 #include "BibbleC/parser/ast/expression/integer_literal.h"
 
+#include "BibbleC/parser/ast/global/function.h"
+
 #include "BibbleC/parser/ast/statement/return_statement.h"
 
 #include "BibbleC/parser/ast/node.h"
@@ -50,6 +52,8 @@ namespace bibblec::parser {
         ASTNodePtr parseExpression(int precedence = 1);
         ASTNodePtr parsePrimary();
         ASTNodePtr parseParenthesizedExpression();
+
+        FunctionPtr parseFunction(lexer::SourceLocation sourceStart, Type* returnType);
 
         ReturnStatementPtr parseReturnStatement();
 

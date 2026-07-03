@@ -82,7 +82,40 @@ namespace bibblec::parser {
         return Type::Get(consume().getText());
     }
 
-    ASTNodePtr Parser::parseGlobal() {}
+    ASTNodePtr Parser::parseGlobal() {
+        switch (current().getTokenType()) {
+            case lexer::TokenType::Identifier:
+                if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
+                    return parseFunction(current().getStartLocation(), Type::Get("error-type"));
+                } else {
+                    mDiag.reportCompilerError(
+                        current().getStartLocation(),
+                        current().getEndLocation(),
+                        "expected parsable function (this error message is temporary and will be removed once proper global parsing is done)"
+                    );
+                    std::exit(1);
+                }
+
+            case lexer::TokenType::Type: {
+                lexer::SourceLocation sourceStart = current().getStartLocation();
+                Type* type = parseType();
+                if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
+                    return parseFunction(sourceStart, type);
+                } else {
+                    mDiag.reportCompilerError(
+                        current().getStartLocation(),
+                        current().getEndLocation(),
+                        "expected parsable function (this error message is temporary and will be removed once proper global parsing is done)"
+                    );
+                    std::exit(1);
+                }
+            }
+
+            case lexer::TokenType::EndOfFile:
+                consume();
+                return nullptr;
+        }
+    }
 
     ASTNodePtr Parser::parseExpression(int precedence) {
         SourcePair source;
@@ -148,6 +181,69 @@ namespace bibblec::parser {
         consume();
 
         return expression;
+    }
+
+    FunctionPtr Parser::parseFunction(lexer::SourceLocation sourceStart, Type* returnType) {
+        SourcePair source;
+        source.start = sourceStart;
+        source.end = current().getEndLocation();
+
+        expectToken(lexer::TokenType::Identifier);
+        std::string name(consume().getText());
+
+        expectToken(lexer::TokenType::LeftParen);
+        consume();
+
+        std::vector<FunctionArgument> arguments;
+        std::vector<Type*> argumentTypes;
+        while (current().getTokenType() != lexer::TokenType::RightParen) {
+            Type* type = parseType();
+
+            expectToken(lexer::TokenType::Identifier);
+            std::string argumentName(consume().getText());
+
+            arguments.emplace_back(type, std::move(argumentName));
+            argumentTypes.push_back(type);
+
+            if (current().getTokenType() != lexer::TokenType::RightParen) {
+                expectToken(lexer::TokenType::Comma);
+                consume();
+            }
+        }
+        consume(); // )
+
+        FunctionType* functionType = FunctionType::Create(returnType, argumentTypes);
+        std::vector<ASTNodePtr> body;
+
+        // if current is equal, create return with parseExpression
+
+        expectToken(lexer::TokenType::LeftBrace);
+        consume();
+
+        scope::ScopePtr scope = std::make_unique<scope::Scope>(mActiveScope);
+        mActiveScope = scope.get();
+
+        while (current().getTokenType() != lexer::TokenType::RightBrace) {
+            body.push_back(parseExpression());
+            expectToken(lexer::TokenType::Semicolon);
+            consume();
+        }
+
+        SourcePair blockEnd(current().getStartLocation(), current().getEndLocation());
+        consume();
+
+        mActiveScope = scope->getParent();
+
+        return std::make_unique<Function>(
+            std::vector<lexer::Token>(),
+            std::move(name),
+            functionType,
+            std::move(arguments),
+            std::move(scope),
+            std::move(body),
+            source,
+            blockEnd
+        );
     }
 
     ReturnStatementPtr Parser::parseReturnStatement() {
