@@ -28,6 +28,7 @@ set(SOURCES
     src/parser/parser.cpp
 
     src/scope/scope.cpp
+    src/scope/symbol.cpp
 
     src/type/function_type.cpp
     src/type/integer_type.cpp
@@ -49,6 +50,7 @@ set(HEADERS
     include/BibbleC/parser/parser.h
 
     include/BibbleC/scope/scope.h
+    include/BibbleC/scope/symbol.h
 
     include/BibbleC/type/function_type.h
     include/BibbleC/type/integer_type.h
