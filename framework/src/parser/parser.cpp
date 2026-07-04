@@ -151,6 +151,9 @@ namespace bibblec::parser {
             case lexer::TokenType::ReturnKeyword:
                 return parseReturnStatement();
 
+            case lexer::TokenType::Type:
+                return parseVariableDeclaration();
+
 
             case lexer::TokenType::IntegerLiteral:
                 return parseIntegerLiteral();
@@ -260,6 +263,26 @@ namespace bibblec::parser {
         source.end = peek(-1).getEndLocation();
 
         return std::make_unique<ReturnStatement>(mActiveScope, std::move(returnValue), source);
+    }
+
+    VariableDeclarationPtr Parser::parseVariableDeclaration() {
+        SourcePair source;
+        source.start = current().getStartLocation();
+
+        Type* type = parseType();
+
+        expectToken(lexer::TokenType::Identifier);
+        std::string name(consume().getText());
+
+        ASTNodePtr initialValue = nullptr;
+        if (current().getTokenType() == lexer::TokenType::Equal) {
+            consume();
+            initialValue = parseExpression();
+        }
+
+        source.end = peek(-1).getEndLocation();
+
+        return std::make_unique<VariableDeclaration>(mActiveScope, std::move(name), type, std::move(initialValue), source);
     }
 
     IntegerLiteralPtr Parser::parseIntegerLiteral() {
