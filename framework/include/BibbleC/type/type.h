@@ -32,6 +32,7 @@ namespace bibblec {
         virtual std::string getSymbolID(Type* thisType) const = 0;
 
         virtual bool isErrorType() const { return false; }
+        virtual bool isAutoType() const { return false; }
         virtual bool isVoidType() const { return false; }
         virtual bool isIntegerType() const { return false; }
         virtual bool isBooleanType() const { return false; }
