@@ -27,6 +27,7 @@ namespace bibblec::scope {
         std::vector<SymbolValue> values;
 
         bool removed = false;
+        bool constant = false;
 
         Symbol(std::string name, Type* type);
 
