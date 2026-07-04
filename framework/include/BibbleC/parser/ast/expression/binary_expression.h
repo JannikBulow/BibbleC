@@ -16,6 +16,8 @@ namespace bibblec::parser {
             Mul,
             Div,
             Mod,
+
+            Assign,
         };
 
         BinaryExpression(scope::Scope* scope, ASTNodePtr left, lexer::Token operatorToken, ASTNodePtr right, SourcePair source);

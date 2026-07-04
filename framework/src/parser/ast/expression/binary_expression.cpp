@@ -1,6 +1,7 @@
 // Copyright 2026 Jannik Laugmand Bülow
 
 #include "BibbleC/parser/ast/expression/binary_expression.h"
+#include "BibbleC/parser/ast/expression/variable_expression.h"
 
 #include "BibbleC/type/integer_type.h"
 
@@ -28,6 +29,9 @@ namespace bibblec::parser {
             case lexer::TokenType::Percent:
                 mOperator = Mod;
                 break;
+            case lexer::TokenType::Equal:
+                mOperator = Assign;
+                break;
 
             default:
                 break; // maybe add an unreachable() thing here
@@ -39,6 +43,24 @@ namespace bibblec::parser {
     }
 
     bibblir::Value* BinaryExpression::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
+        auto createAssign = [&](bibblir::Value* left, bibblir::Value* right) -> bibblir::Value* {
+            if (auto variableExpression = dynamic_cast<VariableExpression*>(mLeft.get())) {
+                scope::Symbol* symbol = mScope->resolveSymbol(variableExpression->getName());
+
+                if (symbol->constant) {
+                    diag.reportCompilerError(mSource, "attempted mutation of constant");
+                    std::exit(1);
+                }
+
+                symbol->values.push_back({builder.getInsertPoint(), right});
+                return right;
+            }
+
+            //TODO: handle load/stores for objects
+
+            return nullptr;
+        };
+
         bibblir::Value* left = mLeft->codegen(builder, module, diag);
         bibblir::Value* right = mRight->codegen(builder, module, diag);
 
@@ -69,6 +91,8 @@ namespace bibblec::parser {
 
                 diag.reportCompilerError(mSource, "can't divide a non-integer type"); // this probably shouldn't say divide, but idk what the verb for modulo is
                 std::exit(1);
+            case Assign:
+                return createAssign(left, right);
         }
 
         return nullptr;
