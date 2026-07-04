@@ -161,6 +161,9 @@ namespace bibblec::parser {
             case lexer::TokenType::CharacterLiteral:
                 return parseCharacterLiteral();
 
+            case lexer::TokenType::Identifier:
+                return parseVariableExpression();
+
             case lexer::TokenType::LeftParen:
                 return parseParenthesizedExpression();
 
@@ -297,5 +300,11 @@ namespace bibblec::parser {
         std::string text(consume().getText());
         char value = text[0];
         return std::make_unique<IntegerLiteral>(mActiveScope, value, Type::Get("char"), source);
+    }
+
+    VariableExpressionPtr Parser::parseVariableExpression() {
+        SourcePair source(current().getStartLocation(), current().getEndLocation());
+        std::string text(consume().getText());
+        return std::make_unique<VariableExpression>(mActiveScope, std::move(text), source);
     }
 }
