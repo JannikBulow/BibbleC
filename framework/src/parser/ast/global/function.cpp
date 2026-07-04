@@ -106,7 +106,7 @@ namespace bibblec::parser {
     void Function::typeCheck(diagnostic::Diagnostics& diag, bool& exit) {
         FunctionType* functionType = static_cast<FunctionType*>(mType);
 
-        if (functionType->getReturnType()->isErrorType()) {
+        if (functionType->getReturnType()->isAutoType()) {
             std::function<ReturnStatement*(ASTNode*)> process = [&process](ASTNode* node) -> ReturnStatement* {
                 if (auto ret = dynamic_cast<ReturnStatement*>(node)) {
                     return ret;
