@@ -6,6 +6,7 @@
 #include "BibbleC/type/integer_type.h"
 
 #include <BibblIR/ir/instruction/binary_instruction.h>
+#include <BibblIR/ir/instruction/load_instruction.h>
 
 namespace bibblec::parser {
     BinaryExpression::BinaryExpression(scope::Scope* scope, ASTNodePtr left, lexer::Token operatorToken, ASTNodePtr right, SourcePair source)
@@ -43,7 +44,7 @@ namespace bibblec::parser {
     }
 
     bibblir::Value* BinaryExpression::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
-        auto createAssign = [&](bibblir::Value* left, bibblir::Value* right) -> bibblir::Value* {
+        auto createAssign = [&](bibblir::Value* left, bibblir::Value* right, bool eraseLeft = true) -> bibblir::Value* {
             if (auto variableExpression = dynamic_cast<VariableExpression*>(mLeft.get())) {
                 scope::Symbol* symbol = mScope->resolveSymbol(variableExpression->getName());
 
@@ -54,9 +55,14 @@ namespace bibblec::parser {
 
                 symbol->values.push_back({builder.getInsertPoint(), right});
                 return right;
-            }
+            } else if (auto load = dynamic_cast<bibblir::LoadInstruction*>(left)) {
+                bibblir::Value* variableOperand = bibblir::GetVariableOperand(load);
+                if (eraseLeft) load->eraseFromParent();
 
-            //TODO: handle load/stores for objects
+                builder.createStore(variableOperand, right);
+
+                return right;
+            }
 
             return nullptr;
         };
