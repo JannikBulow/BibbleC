@@ -63,6 +63,9 @@ namespace bibblec::parser {
             case lexer::TokenType::Minus:
                 return 70;
 
+            case lexer::TokenType::Equal:
+                return 20;
+
             default:
                 return 0;
         }
