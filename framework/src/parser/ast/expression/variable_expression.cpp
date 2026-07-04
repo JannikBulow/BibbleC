@@ -7,6 +7,10 @@ namespace bibblec::parser {
         : ASTNode(scope, source)
         , mName(std::move(name)) {}
 
+    std::string_view VariableExpression::getName() const {
+        return mName;
+    }
+
     ASTNodePtr VariableExpression::cloneExternal(scope::Scope* in) {
         return std::make_unique<VariableExpression>(in, mName, mSource);
     }

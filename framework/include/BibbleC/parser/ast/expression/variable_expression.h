@@ -10,6 +10,8 @@ namespace bibblec::parser {
     public:
         VariableExpression(scope::Scope* scope, std::string name, SourcePair source);
 
+        std::string_view getName() const;
+
         ASTNodePtr cloneExternal(scope::Scope* in) override;
 
         bibblir::Value* codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) override;
