@@ -87,18 +87,6 @@ namespace bibblec::parser {
 
     ASTNodePtr Parser::parseGlobal() {
         switch (current().getTokenType()) {
-            case lexer::TokenType::Identifier:
-                if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
-                    return parseFunction(current().getStartLocation(), Type::Get("error-type"));
-                } else {
-                    mDiag.reportCompilerError(
-                        current().getStartLocation(),
-                        current().getEndLocation(),
-                        "expected parsable function (this error message is temporary and will be removed once proper global parsing is done)"
-                    );
-                    std::exit(1);
-                }
-
             case lexer::TokenType::Type: {
                 lexer::SourceLocation sourceStart = current().getStartLocation();
                 Type* type = parseType();
