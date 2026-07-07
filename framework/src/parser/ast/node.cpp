@@ -1,5 +1,7 @@
 // Copyright 2026 Jannik Laugmand Bülow
 
+#include "BibbleC/parser/ast/expression/cast_expression.h"
+
 #include "BibbleC/parser/ast/node.h"
 
 namespace bibblec::parser {
@@ -22,6 +24,6 @@ namespace bibblec::parser {
         if (node->mType == destType) {
             return std::move(node);
         }
-        return nullptr; // TODO: cast expression
+        return std::make_unique<CastExpression>(node->mScope, std::move(node), destType, node->mSource);
     }
 }

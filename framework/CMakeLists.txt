@@ -19,6 +19,7 @@ set(SOURCES
     src/diagnostic/diagnostics.cpp
 
     src/parser/ast/expression/binary_expression.cpp
+    src/parser/ast/expression/cast_expression.cpp
     src/parser/ast/expression/integer_literal.cpp
     src/parser/ast/expression/unary_expression.cpp
     src/parser/ast/expression/variable_expression.cpp
@@ -49,6 +50,7 @@ set(HEADERS
     include/BibbleC/diagnostic/diagnostics.h
 
     include/BibbleC/parser/ast/expression/binary_expression.h
+    include/BibbleC/parser/ast/expression/cast_expression.h
     include/BibbleC/parser/ast/expression/integer_literal.h
     include/BibbleC/parser/ast/expression/unary_expression.h
     include/BibbleC/parser/ast/expression/variable_expression.h
