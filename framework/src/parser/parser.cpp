@@ -179,7 +179,17 @@ namespace bibblec::parser {
         SourcePair source;
         source.start = consume().getStartLocation();
 
-        //TODO: type cast
+        if (current().getTokenType() == lexer::TokenType::Type) {
+            Type* destType = parseType();
+
+            expectToken(lexer::TokenType::RightParen);
+            consume();
+
+            ASTNodePtr expression = parseExpression(85);
+
+            source.end = peek(-1).getEndLocation();
+            return std::make_unique<CastExpression>(mActiveScope, std::move(expression), destType, source);
+        }
 
         auto expression = parseExpression();
         expectToken(lexer::TokenType::RightParen);
