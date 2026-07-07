@@ -1,6 +1,6 @@
 int main() {
-    int a = 34;
-    int b = 33;
+    auto a = 34;
+    auto b = 33;
 
     a = 0;
 
