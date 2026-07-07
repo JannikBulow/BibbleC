@@ -2,6 +2,8 @@
 
 #include "BibbleC/parser/ast/expression/cast_expression.h"
 
+#include "BibbleC/type/integer_type.h"
+
 namespace bibblec::parser {
     CastExpression::CastExpression(scope::Scope* scope, ASTNodePtr value, Type* destType, SourcePair source)
         : ASTNode(scope, source, destType)
@@ -12,7 +14,8 @@ namespace bibblec::parser {
     }
 
     bibblir::Value* CastExpression::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
-        //TODO: add casting instructions to bibblir
+        bibblir::Value* value = mValue->codegen(builder, module, diag);
+        return value; //TODO: implement this proper
     }
 
     void CastExpression::typeCheck(diagnostic::Diagnostics& diag, bool& exit) {
