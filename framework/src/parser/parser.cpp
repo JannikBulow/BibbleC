@@ -105,6 +105,14 @@ namespace bibblec::parser {
             case lexer::TokenType::EndOfFile:
                 consume();
                 return nullptr;
+
+            default:
+                mDiag.reportCompilerError(
+                    current().getStartLocation(),
+                    current().getEndLocation(),
+                    std::format("expected global expression, got '{}{}{}'", fmt::bold, current().getText(), fmt::reset)
+                );
+                std::exit(1);
         }
     }
 
