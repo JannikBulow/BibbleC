@@ -136,6 +136,22 @@ namespace bibblec::parser {
                 }
                 mType = mLeft->getType();
                 break;
+
+            case Assign:
+                if (mLeft->getType() != mRight->getType()) {
+                    if (mRight->canImplicitCast(diag, mLeft->getType())) {
+                        mRight = CastTo(mRight, mLeft->getType());
+                    } else {
+                        diag.reportCompilerError(mSource,
+                            std::format("no match for '{}operator{}{}' with types '{}{}{}' and '{}{}{}'",
+                                fmt::bold, mOperatorToken.getName(), fmt::reset,
+                                fmt::bold, mLeft->getType()->getName(), fmt::reset,
+                                fmt::bold, mRight->getType()->getName(), fmt::reset)
+                        );
+                        exit = true;
+                    }
+                }
+                break;
         }
     }
 }
