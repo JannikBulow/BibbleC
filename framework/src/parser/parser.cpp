@@ -122,7 +122,7 @@ namespace bibblec::parser {
 
         source.start = current().getStartLocation();
 
-        int unaryOperatorPrecedence = getBinaryOperatorPrecedence(current().getTokenType());
+        int unaryOperatorPrecedence = getUnaryOperatorPrecedence(current().getTokenType());
         if (unaryOperatorPrecedence >= precedence) {
             lexer::Token operatorToken = consume();
             ASTNodePtr operand = parseExpression(unaryOperatorPrecedence);
