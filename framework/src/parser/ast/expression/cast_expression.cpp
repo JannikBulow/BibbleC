@@ -15,7 +15,7 @@ namespace bibblec::parser {
 
     bibblir::Value* CastExpression::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         bibblir::Value* value = mValue->codegen(builder, module, diag);
-        return value; //TODO: implement this proper
+        return value; //TODO: this function must create a bibblir value of the destination type, but realistically, values at runtime don't need any special casting instructions as they're all 64-bit integers
     }
 
     void CastExpression::typeCheck(diagnostic::Diagnostics& diag, bool& exit) {
