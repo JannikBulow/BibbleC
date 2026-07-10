@@ -28,11 +28,14 @@ namespace bibblec::parser {
 
     bool IntegerLiteral::triviallyImplicitCast(diagnostic::Diagnostics& diag, Type* destType) {
         if (destType->isIntegerType()) {
-            if (mValue >= static_cast<uintmax_t>(std::pow(2, destType->getSize() * 8))) {
+            unsigned srcBits = mType->getSize() * 8;
+            unsigned destBits = destType->getSize() * 8;
+
+            if (destBits < srcBits) {
                 diag.reportCompilerWarning(mSource, "implicit",
                     std::format("integer literal '{}{}{}' is being narrowed to '{}{}{}'",
                         fmt::bold, mValue, fmt::reset,
-                        fmt::bold, mValue % static_cast<uintmax_t>(std::pow(2, destType->getSize() * 8)), fmt::reset)
+                        fmt::bold, mValue & ((static_cast<uintmax_t>(1) << destBits) - 1), fmt::reset)
                 );
             }
 
