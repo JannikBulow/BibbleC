@@ -33,6 +33,21 @@ namespace bibblec::parser {
             case lexer::TokenType::Equal:
                 mOperator = Assign;
                 break;
+            case lexer::TokenType::PlusEqual:
+                mOperator = AddAssign;
+                break;
+            case lexer::TokenType::MinusEqual:
+                mOperator = SubAssign;
+                break;
+            case lexer::TokenType::StarEqual:
+                mOperator = MulAssign;
+                break;
+            case lexer::TokenType::SlashEqual:
+                mOperator = DivAssign;
+                break;
+            case lexer::TokenType::PercentEqual:
+                mOperator = ModAssign;
+                break;
 
             default:
                 break; // maybe add an unreachable() thing here
@@ -99,6 +114,40 @@ namespace bibblec::parser {
                 std::exit(1);
             case Assign:
                 return createAssign(left, right);
+            case AddAssign: {
+                auto add = builder.createAdd(left, right);
+                return createAssign(left, add, false);
+            }
+            case SubAssign: {
+                auto sub = builder.createSub(left, right);
+                return createAssign(left, sub, false);
+            }
+            case MulAssign: {
+                auto mul = builder.createMul(left, right);
+                return createAssign(left, mul, false);
+            }
+            case DivAssign: {
+                bibblir::BinaryInstruction* div = nullptr;
+                if (mType->isIntegerType()) {
+                    if (static_cast<IntegerType*>(mType)->isSigned()) {
+                        div = builder.createSDiv(left, right);
+                    } else {
+                        div = builder.createUDiv(left, right);
+                    }
+                }
+                return createAssign(left, div, false);
+            }
+            case ModAssign: {
+                bibblir::BinaryInstruction* mod = nullptr;
+                if (mType->isIntegerType()) {
+                    if (static_cast<IntegerType*>(mType)->isSigned()) {
+                        mod = builder.createSMod(left, right);
+                    } else {
+                        mod = builder.createUMod(left, right);
+                    }
+                }
+                return createAssign(left, mod, false);
+            }
         }
 
         return nullptr;
@@ -150,6 +199,38 @@ namespace bibblec::parser {
                         );
                         exit = true;
                     }
+                }
+                break;
+
+            case AddAssign:
+            case SubAssign:
+            case MulAssign:
+            case DivAssign:
+            case ModAssign:
+                if (mLeft->getType()->isIntegerType()) {
+                    if (mLeft->getType() != mRight->getType()) {
+                        if (mRight->canImplicitCast(diag, mLeft->getType())) {
+                            mRight = CastTo(mRight, mLeft->getType());
+                        } else {
+                            diag.reportCompilerError(mSource,
+                                std::format("no match for '{}operator{}{}' with types '{}{}{}' and '{}{}{}'",
+                                    fmt::bold, mOperatorToken.getName(), fmt::reset,
+                                    fmt::bold, mLeft->getType()->getName(), fmt::reset,
+                                    fmt::bold, mRight->getType()->getName(), fmt::reset)
+                            );
+                            exit = true;
+                        }
+                        mType = mLeft->getType();
+                    }
+                } else {
+                    diag.reportCompilerError(mSource,
+                                std::format("no match for '{}operator{}{}' with types '{}{}{}' and '{}{}{}'",
+                                    fmt::bold, mOperatorToken.getName(), fmt::reset,
+                                    fmt::bold, mLeft->getType()->getName(), fmt::reset,
+                                    fmt::bold, mRight->getType()->getName(), fmt::reset)
+                            );
+                    exit = true;
+                    mType = Type::Get("error-type");
                 }
                 break;
         }

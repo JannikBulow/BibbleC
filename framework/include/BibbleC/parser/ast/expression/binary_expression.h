@@ -18,6 +18,11 @@ namespace bibblec::parser {
             Mod,
 
             Assign,
+            AddAssign,
+            SubAssign,
+            MulAssign,
+            DivAssign,
+            ModAssign,
         };
 
         BinaryExpression(scope::Scope* scope, ASTNodePtr left, lexer::Token operatorToken, ASTNodePtr right, SourcePair source);
