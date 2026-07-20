@@ -5,7 +5,7 @@
 
 #include "BibbleC/debug/source_pair.h"
 
-#include "BibbleC/lexer/SourceLocation.h"
+#include "BibbleC/lexer/source_location.h"
 
 #include "BibbleC/util/better_strings.h"
 

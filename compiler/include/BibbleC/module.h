@@ -3,7 +3,7 @@
 #ifndef BIBBLEC_MODULE_H
 #define BIBBLEC_MODULE_H
 
-#include <BibbleC/lexer/Token.h>
+#include <BibbleC/lexer/token.h>
 
 #include <BibbleC/parser/ast/node.h>
 

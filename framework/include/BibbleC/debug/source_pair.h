@@ -3,7 +3,7 @@
 #ifndef BIBBLEC_DEBUG_SOURCE_PAIR_H
 #define BIBBLEC_DEBUG_SOURCE_PAIR_H
 
-#include "BibbleC/lexer/SourceLocation.h"
+#include "BibbleC/lexer/source_location.h"
 
 namespace bibblec {
     struct SourcePair {

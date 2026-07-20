@@ -3,7 +3,7 @@
 #ifndef BIBBLEC_PARSER_AST_GLOBAL_FUNCTION_H
 #define BIBBLEC_PARSER_AST_GLOBAL_FUNCTION_H
 
-#include "BibbleC/lexer/Token.h"
+#include "BibbleC/lexer/token.h"
 
 #include "BibbleC/parser/ast/node.h"
 

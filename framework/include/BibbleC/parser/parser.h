@@ -5,7 +5,7 @@
 
 #include "BibbleC/diagnostic/diagnostics.h"
 
-#include "BibbleC/lexer/Token.h"
+#include "BibbleC/lexer/token.h"
 
 #include "BibbleC/parser/ast/expression/binary_expression.h"
 #include "BibbleC/parser/ast/expression/cast_expression.h"

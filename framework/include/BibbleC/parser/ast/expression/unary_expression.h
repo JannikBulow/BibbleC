@@ -3,7 +3,7 @@
 #ifndef BIBBLEC_PARSER_AST_EXPRESSION_UNARY_EXPRESSION_H
 #define BIBBLEC_PARSER_AST_EXPRESSION_UNARY_EXPRESSION_H
 
-#include "BibbleC/lexer/Token.h"
+#include "BibbleC/lexer/token.h"
 
 #include "BibbleC/parser/ast/node.h"
 

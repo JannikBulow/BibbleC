@@ -5,7 +5,7 @@
 #include <BibbleBytecode/buffer.h>
 #include <BibbleBytecode/writer.h>
 
-#include <BibbleC/lexer/Lexer.h>
+#include <BibbleC/lexer/lexer.h>
 
 #include <BibbleC/parser/parser.h>
 
