@@ -37,6 +37,7 @@ set(SOURCES
     src/scope/symbol.cpp
 
     src/type/auto_type.cpp
+    src/type/boolean_type.cpp
     src/type/error_type.cpp
     src/type/function_type.cpp
     src/type/integer_type.cpp
@@ -68,6 +69,7 @@ set(HEADERS
     include/BibbleC/scope/symbol.h
 
     include/BibbleC/type/auto_type.h
+    include/BibbleC/type/boolean_type.h
     include/BibbleC/type/error_type.h
     include/BibbleC/type/function_type.h
     include/BibbleC/type/integer_type.h

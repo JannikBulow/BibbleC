@@ -1,6 +1,7 @@
 // Copyright 2026 Jannik Laugmand Bülow
 
 #include "BibbleC/type/auto_type.h"
+#include "BibbleC/type/boolean_type.h"
 #include "BibbleC/type/error_type.h"
 #include "BibbleC/type/function_type.h"
 #include "BibbleC/type/integer_type.h"
@@ -27,6 +28,7 @@ namespace bibblec {
         types["ulong"] = std::make_unique<IntegerType>(IntegerType::Long, false);
 
         types["void"] = std::make_unique<VoidType>();
+        types["bool"] = std::make_unique<BooleanType>();
 
         types["auto"] = std::make_unique<AutoType>();
 
