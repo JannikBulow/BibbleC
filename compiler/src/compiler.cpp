@@ -99,6 +99,10 @@ namespace bibblec {
         bibblir::CodegenVisitor codegen;
         module.module.accept(codegen);
 
+        std::cout << "\n\n";
+        codegen.printDisassembly(std::cout);
+        std::cout << "\n\n";
+
         bibbleasm::Module builtModule = codegen.buildModule();
 
         bibblebytecode::WritableByteBuffer buffer;
