@@ -4,6 +4,8 @@
 
 #include "BibbleC/type/integer_type.h"
 
+#include <BibblIR/ir/instruction/int_cast_instruction.h>
+
 namespace bibblec::parser {
     CastExpression::CastExpression(scope::Scope* scope, ASTNodePtr value, Type* destType, SourcePair source)
         : ASTNode(scope, source, destType)
@@ -15,6 +17,11 @@ namespace bibblec::parser {
 
     bibblir::Value* CastExpression::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         bibblir::Value* value = mValue->codegen(builder, module, diag);
+
+        if (mType->isIntegerType() && mValue->getType()->isIntegerType()) {
+            return builder.createIntCast(value, mType->getBibblirType());
+        }
+
         return value; //TODO: this function must create a bibblir value of the destination type, but realistically, values at runtime don't need any special casting instructions as they're all 64-bit integers
     }
 
