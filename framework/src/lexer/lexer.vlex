@@ -33,6 +33,7 @@ tokens bibblec {
     short Type
     int Type
     long Type
+    bool Type
 }
 
 comments {
