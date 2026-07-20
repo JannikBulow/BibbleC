@@ -1,8 +1,8 @@
 int main() {
-    long a = 34;
+    long a = 30;
     int b = 33;
 
-    a = 0;
+    a += 4;
 
     return a + b;
 }
