@@ -37,6 +37,8 @@ namespace bibblec::parser {
                         fmt::bold, mValue, fmt::reset,
                         fmt::bold, mValue & ((static_cast<uintmax_t>(1) << destBits) - 1), fmt::reset)
                 );
+
+                mValue = mValue & ((static_cast<uintmax_t>(1) << destBits) - 1);
             }
 
             mType = destType;

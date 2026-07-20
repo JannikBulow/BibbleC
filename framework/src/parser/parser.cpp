@@ -144,7 +144,7 @@ namespace bibblec::parser {
             lexer::Token operatorToken = consume();
             ASTNodePtr right = parseExpression(binaryOperatorPrecedence);
             source.end = peek(-1).getEndLocation();
-            left = std::make_unique<BinaryExpression>(mActiveScope, std::move(left), std::move(operatorToken), std::move(right), std::move(source));
+            left = std::make_unique<BinaryExpression>(mActiveScope, std::move(left), std::move(operatorToken), std::move(right), source);
         }
 
         return left;
@@ -164,6 +164,10 @@ namespace bibblec::parser {
 
             case lexer::TokenType::CharacterLiteral:
                 return parseCharacterLiteral();
+
+            case lexer::TokenType::TrueKeyword:
+            case lexer::TokenType::FalseKeyword:
+                return parseBooleanLiteral();
 
             case lexer::TokenType::Identifier:
                 return parseVariableExpression();
@@ -314,6 +318,12 @@ namespace bibblec::parser {
         std::string text(consume().getText());
         char value = text[0];
         return std::make_unique<IntegerLiteral>(mActiveScope, value, Type::Get("char"), source);
+    }
+
+    BooleanLiteralPtr Parser::parseBooleanLiteral() {
+        SourcePair source(current().getStartLocation(), current().getEndLocation());
+        bool value = consume().getTokenType() == lexer::TokenType::TrueKeyword;
+        return std::make_unique<BooleanLiteral>(mActiveScope, value, source);
     }
 
     VariableExpressionPtr Parser::parseVariableExpression() {

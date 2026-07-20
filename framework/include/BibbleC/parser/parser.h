@@ -8,6 +8,7 @@
 #include "BibbleC/lexer/token.h"
 
 #include "BibbleC/parser/ast/expression/binary_expression.h"
+#include "BibbleC/parser/ast/expression/boolean_literal.h"
 #include "BibbleC/parser/ast/expression/cast_expression.h"
 #include "BibbleC/parser/ast/expression/integer_literal.h"
 #include "BibbleC/parser/ast/expression/unary_expression.h"
@@ -64,6 +65,7 @@ namespace bibblec::parser {
 
         IntegerLiteralPtr parseIntegerLiteral();
         IntegerLiteralPtr parseCharacterLiteral();
+        BooleanLiteralPtr parseBooleanLiteral();
         VariableExpressionPtr parseVariableExpression();
     };
 }
