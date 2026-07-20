@@ -25,6 +25,9 @@ tokens bibblec {
     _string_literal
     _character_literal
 
+    true
+    false
+
     return
 
     auto Type
