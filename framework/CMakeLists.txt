@@ -10,7 +10,7 @@ FetchContent_Declare(BibblIR
 FetchContent_MakeAvailable(BibblIR)
 
 FetchContent_Declare(vlex
-    GIT_REPOSITORY https://github.com/viper-org/vlex
+    GIT_REPOSITORY https://github.com/JannikBulow/vlex
     GIT_TAG master
 )
 FetchContent_MakeAvailable(vlex)
@@ -111,4 +111,4 @@ set_target_properties(BibbleC-framework-shared PROPERTIES OUTPUT_NAME "bibblec-b
 set_target_properties(BibbleC-framework-static PROPERTIES OUTPUT_NAME "bibblec-backend-aio")
 
 #TODO: vlex export api support
-vlex_generate(BibbleC-framework-shared src/lexer/lexer.vlex src/lexer include/BibbleC/lexer)
+vlex_generate(BibbleC-framework-shared src/lexer/lexer.vlex src/lexer include/BibbleC/lexer FILE_NAME_STYLE snake_case)
