@@ -4,6 +4,9 @@
 
 #include "BibbleC/type/integer_type.h"
 
+#include <BibblIR/ir/constant/constant_int.h>
+
+#include <BibblIR/ir/instruction/binary_instruction.h>
 #include <BibblIR/ir/instruction/int_cast_instruction.h>
 
 namespace bibblec::parser {
@@ -20,6 +23,9 @@ namespace bibblec::parser {
 
         if (mType->isIntegerType() && mValue->getType()->isIntegerType()) {
             return builder.createIntCast(value, mType->getBibblirType());
+        } else if (mType->isBooleanType() && mValue->getType()->isIntegerType()) {
+            auto constant0 = builder.createConstantInt(0, mValue->getType()->getBibblirType());
+            return builder.createCmpNE(value, constant0);
         }
 
         return value; //TODO: this function must create a bibblir value of the destination type, but realistically, values at runtime don't need any special casting instructions as they're all 64-bit integers
