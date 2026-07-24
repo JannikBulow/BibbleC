@@ -152,6 +152,9 @@ namespace bibblec::parser {
 
     ASTNodePtr Parser::parsePrimary() {
         switch (current().getTokenType()) {
+            case lexer::TokenType::IfKeyword:
+                return parseIfStatement();
+
             case lexer::TokenType::ReturnKeyword:
                 return parseReturnStatement();
 
@@ -268,6 +271,34 @@ namespace bibblec::parser {
             source,
             blockEnd
         );
+    }
+
+    IfStatementPtr Parser::parseIfStatement() {
+        SourcePair source;
+        source.start = consume().getStartLocation();
+
+        expectToken(lexer::TokenType::LeftParen);
+        consume();
+
+        auto condition = parseExpression();
+
+        expectToken(lexer::TokenType::RightParen);
+        consume();
+
+        source.end = peek(-1).getEndLocation();
+
+        auto body = parseExpression();
+
+        ASTNodePtr elseBody = nullptr;
+        if (peek(1).getTokenType() == lexer::TokenType::ElseKeyword) {
+            expectToken(lexer::TokenType::Semicolon);
+            consume();
+
+            consume(); // else
+            elseBody = parseExpression();
+        }
+
+        return std::make_unique<IfStatement>(std::move(condition), std::move(body), std::move(elseBody), mActiveScope, source);
     }
 
     ReturnStatementPtr Parser::parseReturnStatement() {

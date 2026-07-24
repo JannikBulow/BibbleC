@@ -16,6 +16,7 @@
 
 #include "BibbleC/parser/ast/global/function.h"
 
+#include "BibbleC/parser/ast/statement/if_statement.h"
 #include "BibbleC/parser/ast/statement/return_statement.h"
 #include "BibbleC/parser/ast/statement/variable_declaration.h"
 
@@ -60,6 +61,7 @@ namespace bibblec::parser {
 
         FunctionPtr parseFunction(lexer::SourceLocation sourceStart, Type* returnType);
 
+        IfStatementPtr parseIfStatement();
         ReturnStatementPtr parseReturnStatement();
         VariableDeclarationPtr parseVariableDeclaration();
 
