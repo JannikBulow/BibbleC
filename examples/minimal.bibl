@@ -2,7 +2,8 @@ int main() {
     long a = 30;
     int b = 33;
 
-    a += 4;
+    if (1) a += 10;
+    else a = 0;
 
     return a + b;
 }
