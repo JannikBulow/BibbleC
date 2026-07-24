@@ -30,6 +30,9 @@ tokens bibblec {
 
     return
 
+    if
+    else
+
     auto Type
     void Type
     byte Type
