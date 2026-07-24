@@ -42,7 +42,11 @@ namespace bibblec::parser {
 
         virtual bibblir::Value* codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) = 0;
         virtual void setEmittedValue(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {};
-        virtual bibblir::Value* ccodegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag, bibblir::BasicBlock* trueBB, bibblir::BasicBlock* falseBB) { return nullptr; };
+        virtual bibblir::Value* ccodegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag, bibblir::BasicBlock* trueBB, bibblir::BasicBlock* falseBB) {
+            bibblir::Value* value = codegen(builder, module, diag);
+            builder.createCondBr(value, trueBB, falseBB);
+            return nullptr;
+        };
 
         virtual void typeCheck(diagnostic::Diagnostics& diag, bool& exit) = 0;
         virtual bool triviallyImplicitCast(diagnostic::Diagnostics& diag, Type* destType) { return false; }
