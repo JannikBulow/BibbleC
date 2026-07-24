@@ -16,6 +16,10 @@ namespace bibblec::scope {
         return mChildren;
     }
 
+    const std::vector<SymbolPtr>& Scope::getSymbols() const {
+        return mSymbols;
+    }
+
     Symbol* Scope::getLatestSymbol() const {
         return mSymbols.back().get();
     }

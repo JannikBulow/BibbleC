@@ -38,6 +38,7 @@ namespace bibblec::scope {
 
         Scope* getParent() const;
         const std::vector<Scope*>& getChildren() const;
+        const std::vector<SymbolPtr>& getSymbols() const;
 
         Symbol* getLatestSymbol() const;
         Symbol* resolveSymbol(std::string_view name) const;
