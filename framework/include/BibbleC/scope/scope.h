@@ -12,20 +12,6 @@
 namespace bibblec::scope {
     class BIBBLEC_EXPORT Scope {
     public:
-        explicit Scope(Scope* parent = nullptr);
-
-        Scope* getParent() const;
-        const std::vector<Scope*>& getChildren() const;
-
-        Symbol* getLatestSymbol() const;
-        Symbol* resolveSymbol(std::string_view name) const;
-        std::vector<Symbol*> getCandidateFunctions(std::string_view name) const;
-        void addSymbol(SymbolPtr symbol);
-
-        Type* getCurrentReturnType() const;
-        void setCurrentReturnType(Type* type);
-
-    private:
         template<class T>
         struct BaseIterator {
             T* current;
@@ -43,17 +29,31 @@ namespace bibblec::scope {
         using Iterator = BaseIterator<Scope>;
         using ConstIterator = BaseIterator<const Scope>;
 
+        explicit Scope(Scope* parent = nullptr);
+
+        Iterator begin() { return this; }
+        Iterator end() { return nullptr; }
+        ConstIterator begin() const { return this; }
+        ConstIterator end() const { return nullptr; }
+
+        Scope* getParent() const;
+        const std::vector<Scope*>& getChildren() const;
+
+        Symbol* getLatestSymbol() const;
+        Symbol* resolveSymbol(std::string_view name) const;
+        std::vector<Symbol*> getCandidateFunctions(std::string_view name) const;
+        void addSymbol(SymbolPtr symbol);
+
+        Type* getCurrentReturnType() const;
+        void setCurrentReturnType(Type* type);
+
+    private:
         Scope* mParent;
         std::vector<Scope*> mChildren;
 
         std::vector<SymbolPtr> mSymbols;
 
         Type* mCurrentReturnType = nullptr;
-
-        Iterator begin() { return this; }
-        Iterator end() { return nullptr; }
-        ConstIterator begin() const { return this; }
-        ConstIterator end() const { return nullptr; }
     };
 
     using ScopePtr = std::unique_ptr<Scope>;
