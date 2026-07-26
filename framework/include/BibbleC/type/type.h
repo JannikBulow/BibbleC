@@ -22,7 +22,7 @@ namespace bibblec {
         explicit Type(std::string name) : mName(std::move(name)) {}
         virtual ~Type() = default;
 
-        std::string_view getName() const { return mName; }
+        virtual std::string_view getName() const { return mName; }
         virtual int getSize() const = 0;
 
         virtual bibblir::Type* getBibblirType() const = 0;
