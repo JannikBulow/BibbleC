@@ -35,7 +35,7 @@ namespace bibblec {
         for (auto field : mFields) {
             fieldTypes.push_back(field.type->getBibblirType());
         }
-        return bibblir::Type::GetClassType(std::move(fieldTypes));
+        return bibblir::Type::GetClassType();
     }
 
     Type::CastLevel ClassType::castTo(Type* destType) const {
