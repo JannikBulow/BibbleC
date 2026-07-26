@@ -65,7 +65,7 @@ namespace bibblec {
             return it->get();
         }
 
-        functionTypes.push_back(std::make_unique<FunctionType>(returnType, argumentTypes));
+        functionTypes.push_back(std::make_unique<FunctionType>(returnType, std::move(argumentTypes)));
         return functionTypes.back().get();
     }
 
