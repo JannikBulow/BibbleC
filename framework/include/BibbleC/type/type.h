@@ -37,6 +37,7 @@ namespace bibblec {
         virtual bool isIntegerType() const { return false; }
         virtual bool isBooleanType() const { return false; }
         virtual bool isFunctionType() const { return false; }
+        virtual bool isClassType() const { return false; }
 
         static void Init();
         static void AddAlias(std::string name, Type* type);
