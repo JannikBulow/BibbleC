@@ -2,6 +2,7 @@
 
 #include "BibbleC/type/auto_type.h"
 #include "BibbleC/type/boolean_type.h"
+#include "BibbleC/type/class_type.h"
 #include "BibbleC/type/error_type.h"
 #include "BibbleC/type/function_type.h"
 #include "BibbleC/type/integer_type.h"
@@ -59,6 +60,7 @@ namespace bibblec {
         types.clear();
         aliases.clear();
 
+        ClassType::Reset();
         FunctionType::Reset();
     }
 }

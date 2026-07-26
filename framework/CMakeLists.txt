@@ -42,6 +42,7 @@ set(SOURCES
 
     src/type/auto_type.cpp
     src/type/boolean_type.cpp
+    src/type/class_type.cpp
     src/type/error_type.cpp
     src/type/function_type.cpp
     src/type/integer_type.cpp
@@ -78,6 +79,7 @@ set(HEADERS
 
     include/BibbleC/type/auto_type.h
     include/BibbleC/type/boolean_type.h
+    include/BibbleC/type/class_type.h
     include/BibbleC/type/error_type.h
     include/BibbleC/type/function_type.h
     include/BibbleC/type/integer_type.h
