@@ -142,9 +142,14 @@ namespace bibblec::parser {
             if (binaryOperatorPrecedence < precedence) break;
 
             lexer::Token operatorToken = consume();
-            ASTNodePtr right = parseExpression(binaryOperatorPrecedence);
-            source.end = peek(-1).getEndLocation();
-            left = std::make_unique<BinaryExpression>(mActiveScope, std::move(left), std::move(operatorToken), std::move(right), source);
+
+            if (operatorToken.getTokenType() == lexer::TokenType::LeftParen) {
+                left = parseCallExpression(std::move(left));
+            } else {
+                ASTNodePtr right = parseExpression(binaryOperatorPrecedence);
+                source.end = peek(-1).getEndLocation();
+                left = std::make_unique<BinaryExpression>(mActiveScope, std::move(left), std::move(operatorToken), std::move(right), source);
+            }
         }
 
         return left;
@@ -386,5 +391,23 @@ namespace bibblec::parser {
         SourcePair source(current().getStartLocation(), current().getEndLocation());
         std::string text(consume().getText());
         return std::make_unique<VariableExpression>(mActiveScope, std::move(text), source);
+    }
+
+    CallExpressionPtr Parser::parseCallExpression(ASTNodePtr callee) {
+        SourcePair source;
+        source.start = callee->getSource().start;
+
+        std::vector<ASTNodePtr> parameters;
+        while (current().getTokenType() != lexer::TokenType::RightParen) {
+            parameters.push_back(parseExpression());
+
+            if (current().getTokenType() != lexer::TokenType::RightParen) {
+                expectToken(lexer::TokenType::Comma);
+                consume();
+            }
+        }
+        source.end = consume().getEndLocation();
+
+        return std::make_unique<CallExpression>(mActiveScope, std::move(callee), std::move(parameters), source);
     }
 }
