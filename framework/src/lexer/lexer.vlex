@@ -25,6 +25,8 @@ tokens bibblec {
     _string_literal
     _character_literal
 
+    class
+
     true
     false
 
