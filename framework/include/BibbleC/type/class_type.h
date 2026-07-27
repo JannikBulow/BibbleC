@@ -8,16 +8,7 @@
 namespace bibblec {
     class BIBBLEC_EXPORT ClassType : public Type {
     public:
-        struct Field {
-            std::string name;
-            Type* type;
-        };
-
-        ClassType(std::string name, std::vector<Field> fields);
-
-        std::vector<Field>& fields();
-        bool hasField(std::string_view fieldName) { return getField(fieldName) != nullptr; }
-        Field* getField(std::string_view fieldName);
+        explicit ClassType(std::string name);
 
         std::string_view getName() const override;
         int getSize() const override;
@@ -29,14 +20,12 @@ namespace bibblec {
 
         bool isClassType() const override;
 
-        static ClassType* Get(std::string name);
         static std::vector<ClassType*> GetAllClassTypes();
-        static ClassType* Create(std::string name, std::vector<Field> fields);
+        static ClassType* Create(std::string name);
         static void Reset();
 
     private:
         std::string mName;
-        std::vector<Field> mFields;
     };
 }
 

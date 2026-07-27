@@ -16,16 +16,10 @@ namespace bibblec::parser {
         mScope->addSymbol(std::make_unique<scope::Symbol>(mName, nullptr));
         mSymbol = mScope->getLatestSymbol();
 
-        std::vector<ClassType::Field> classTypeFields;
-        classTypeFields.reserve(mFields.size());
-        for (auto& field : mFields) {
-            classTypeFields.emplace_back(field.name, field.type);
-        }
-
         if (Type* type = Type::Get(mName)) {
             mType = type;
         } else {
-            mType = ClassType::Create(mName, std::move(classTypeFields));
+            mType = ClassType::Create(mName);
         }
     }
 
