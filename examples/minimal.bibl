@@ -1,6 +1,10 @@
 class Test {
     int a;
     int b;
+
+    int add() {
+        return 0;
+    }
 }
 
 void test() {
