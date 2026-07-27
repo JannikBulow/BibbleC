@@ -16,6 +16,7 @@ namespace bibblec::parser {
 
     Function::Function(
         std::vector<lexer::Token> modifierTokens,
+            Type* implType,
         std::string name,
         FunctionType* type,
         std::vector<FunctionArgument> arguments,
@@ -24,6 +25,7 @@ namespace bibblec::parser {
         SourcePair source,
         SourcePair blockEnd)
         : ASTNode(ownScope->getParent(), source, type)
+        , mImplType(implType)
         , mName(std::move(name))
         , mArguments(std::move(arguments))
         , mBody(std::move(body))
@@ -35,6 +37,7 @@ namespace bibblec::parser {
 
     Function::Function(
         FunctionModifiers modifiers,
+            Type* implType,
         std::string name,
         FunctionType* type,
         std::vector<FunctionArgument> arguments,
@@ -44,6 +47,7 @@ namespace bibblec::parser {
         SourcePair blockEnd)
         : ASTNode(ownScope->getParent(), source, type)
         , mModifiers(modifiers)
+        , mImplType(implType)
         , mName(std::move(name))
         , mArguments(std::move(arguments))
         , mBody(std::move(body))
@@ -67,7 +71,7 @@ namespace bibblec::parser {
     ASTNodePtr Function::cloneExternal(scope::Scope* in) {
         scope::ScopePtr ownScope = std::make_unique<scope::Scope>(in);
         auto functionType = static_cast<FunctionType*>(mType);
-        return std::make_unique<Function>(mModifiers, mName, functionType, mArguments, std::move(ownScope), std::vector<ASTNodePtr>(), mSource, mBlockEnd);
+        return std::make_unique<Function>(mModifiers, mImplType, mName, functionType, mArguments, std::move(ownScope), std::vector<ASTNodePtr>(), mSource, mBlockEnd);
     }
 
     bibblir::Value* Function::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
@@ -160,6 +164,15 @@ namespace bibblec::parser {
     }
 
     void Function::constructorImpl(FunctionType* type) {
+        if (mImplType) {
+            mArguments.insert(mArguments.begin(), {mImplType, "this"});
+
+            auto argTypes = type->getArgumentTypes();
+            argTypes.insert(argTypes.begin(), mImplType);
+            type = FunctionType::Create(type->getReturnType(), std::move(argTypes));
+            mType = type;
+        }
+
         mOwnScope->setCurrentReturnType(type->getReturnType());
         mScope->addSymbol(std::make_unique<scope::Symbol>(mName, type));
         mSymbol = mScope->getLatestSymbol();
@@ -176,7 +189,10 @@ namespace bibblec::parser {
 
         FunctionType* functionType = static_cast<FunctionType*>(mType);
 
-        std::string mangled = mName;
+        std::string mangled;
+
+        if (mImplType) mangled += mImplType->getSymbolID(nullptr) + "::";
+        mangled += mName;
 
         mangled += '(';
         for (Type* argument : functionType->getArgumentTypes()) {

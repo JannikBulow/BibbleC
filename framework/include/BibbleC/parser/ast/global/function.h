@@ -36,6 +36,7 @@ namespace bibblec::parser {
     public:
         Function(
             std::vector<lexer::Token> modifierTokens,
+            Type* implType,
             std::string name,
             FunctionType* type,
             std::vector<FunctionArgument> arguments,
@@ -47,6 +48,7 @@ namespace bibblec::parser {
 
         Function(
             FunctionModifiers modifiers,
+            Type* implType,
             std::string name,
             FunctionType* type,
             std::vector<FunctionArgument> arguments,
@@ -69,6 +71,7 @@ namespace bibblec::parser {
 
     private:
         FunctionModifiers mModifiers;
+        Type* mImplType;
         std::string mName;
         std::vector<FunctionArgument> mArguments;
         std::vector<ASTNodePtr> mBody;
