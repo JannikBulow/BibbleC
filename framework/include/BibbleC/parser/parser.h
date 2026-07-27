@@ -15,6 +15,7 @@
 #include "BibbleC/parser/ast/expression/unary_expression.h"
 #include "BibbleC/parser/ast/expression/variable_expression.h"
 
+#include "BibbleC/parser/ast/global/class_declaration.h"
 #include "BibbleC/parser/ast/global/function.h"
 
 #include "BibbleC/parser/ast/statement/compound_statement.h"
@@ -61,6 +62,7 @@ namespace bibblec::parser {
         ASTNodePtr parsePrimary();
         ASTNodePtr parseParenthesizedExpression();
 
+        ClassDeclarationPtr parseClassDeclaration();
         FunctionPtr parseFunction(lexer::SourceLocation sourceStart, Type* returnType);
 
         CompoundStatementPtr parseCompoundStatement();

@@ -92,6 +92,9 @@ namespace bibblec::parser {
 
     ASTNodePtr Parser::parseGlobal() {
         switch (current().getTokenType()) {
+            case lexer::TokenType::ClassKeyword:
+                return parseClassDeclaration();
+
             case lexer::TokenType::Type: {
                 lexer::SourceLocation sourceStart = current().getStartLocation();
                 Type* type = parseType();
@@ -216,6 +219,40 @@ namespace bibblec::parser {
         consume();
 
         return expression;
+    }
+
+    ClassDeclarationPtr Parser::parseClassDeclaration() {
+        SourcePair source;
+        source.start = consume().getStartLocation();
+
+        expectToken(lexer::TokenType::Identifier);
+        std::string className(consume().getText());
+
+        expectToken(lexer::TokenType::LeftBrace);
+        consume();
+
+        std::vector<ClassField> fields;
+        std::vector<ClassMethod> methods;
+        while (current().getTokenType() != lexer::TokenType::RightBrace) {
+            expectToken(lexer::TokenType::Type);
+            Type* type = parseType();
+
+            expectToken(lexer::TokenType::Identifier);
+            if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
+                // TODO: method
+                std::exit(4);
+            }
+
+            std::string name(consume().getText());
+
+            expectToken(lexer::TokenType::Semicolon);
+            consume();
+
+            fields.emplace_back(type, std::move(name));
+        }
+        source.end = consume().getEndLocation();
+
+        return std::make_unique<ClassDeclaration>(mActiveScope, std::move(className), std::move(fields), std::move(methods), source);
     }
 
     FunctionPtr Parser::parseFunction(lexer::SourceLocation sourceStart, Type* returnType) {
