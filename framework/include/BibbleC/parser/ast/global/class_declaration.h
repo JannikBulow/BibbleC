@@ -17,6 +17,7 @@ namespace bibblec::parser {
 
     struct ClassMethod {
         FunctionPtr impl;
+        bool isVirtual = false; // will soon be used
 
         ClassMethod(FunctionPtr impl) : impl(std::move(impl)) {}
     };

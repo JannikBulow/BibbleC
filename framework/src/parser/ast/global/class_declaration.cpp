@@ -48,7 +48,10 @@ namespace bibblec::parser {
         }
 
         for (auto& method : mMethods) {
-            clas->addMethod(static_cast<bibblir::FunctionType*>(method.impl->getType()->getBibblirType()), std::string(method.impl->getName()), method.impl->codegen(builder, module, diag));
+            bibblir::Value* impl = method.impl->codegen(builder, module, diag);
+            if (method.isVirtual) {
+                clas->addMethod(static_cast<bibblir::FunctionType*>(method.impl->getType()->getBibblirType()), std::string(method.impl->getName()), impl);
+            }
         }
 
         return clas;
