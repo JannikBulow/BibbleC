@@ -52,6 +52,10 @@ namespace bibblec::parser {
         constructorImpl(type);
     }
 
+    std::string_view Function::getName() const {
+        return mName;
+    }
+
     std::vector<ASTNode*> Function::getChildren() {
         std::vector<ASTNode*> children;
         for (ASTNodePtr& node : mBody) {

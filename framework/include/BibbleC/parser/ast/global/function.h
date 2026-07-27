@@ -56,6 +56,8 @@ namespace bibblec::parser {
             SourcePair blockEnd
         );
 
+        std::string_view getName() const;
+
         std::vector<ASTNode*> getChildren() override;
 
         ASTNodePtr cloneExternal(scope::Scope* in) override;
