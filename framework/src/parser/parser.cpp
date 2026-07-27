@@ -2,7 +2,7 @@
 
 #include "BibbleC/parser/parser.h"
 
-#include "../../../cmake-build-debug/_deps/vlex-src/include/diagnostic/Diagnostic.h"
+#include "BibbleC/type/class_type.h"
 
 namespace bibblec::parser {
     Parser::Parser(std::vector<lexer::Token>& tokens, diagnostic::Diagnostics& diag, scope::Scope* globalScope)
@@ -42,7 +42,7 @@ namespace bibblec::parser {
             mDiag.reportCompilerError(
                 current().getStartLocation(),
                 current().getEndLocation(),
-                std::format("Expected '{}{}{}', got '{}{}{}'",
+                std::format("expected '{}{}{}', got '{}{}{}'",
                     fmt::bold, temp.getName(), fmt::reset,
                     fmt::bold, current().getText(), fmt::reset)
             );
@@ -99,7 +99,7 @@ namespace bibblec::parser {
                 lexer::SourceLocation sourceStart = current().getStartLocation();
                 Type* type = parseType();
                 if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
-                    return parseFunction(sourceStart, type);
+                    return parseFunction(sourceStart, type, nullptr);
                 } else {
                     mDiag.reportCompilerError(
                         current().getStartLocation(),
@@ -228,19 +228,24 @@ namespace bibblec::parser {
         expectToken(lexer::TokenType::Identifier);
         std::string className(consume().getText());
 
+        ClassType* classType = ClassType::Create(className);
+
         expectToken(lexer::TokenType::LeftBrace);
         consume();
 
         std::vector<ClassField> fields;
         std::vector<ClassMethod> methods;
         while (current().getTokenType() != lexer::TokenType::RightBrace) {
+            lexer::SourceLocation memberStart = current().getStartLocation();
+
             expectToken(lexer::TokenType::Type);
             Type* type = parseType();
 
             expectToken(lexer::TokenType::Identifier);
             if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
-                // TODO: method
-                std::exit(4);
+                FunctionPtr function = parseFunction(memberStart, type, classType);
+                methods.emplace_back(std::move(function));
+                continue;
             }
 
             std::string name(consume().getText());
@@ -255,7 +260,7 @@ namespace bibblec::parser {
         return std::make_unique<ClassDeclaration>(mActiveScope, std::move(className), std::move(fields), std::move(methods), source);
     }
 
-    FunctionPtr Parser::parseFunction(lexer::SourceLocation sourceStart, Type* returnType) {
+    FunctionPtr Parser::parseFunction(lexer::SourceLocation sourceStart, Type* returnType, Type* implType) {
         SourcePair source;
         source.start = sourceStart;
         source.end = current().getEndLocation();
@@ -308,6 +313,7 @@ namespace bibblec::parser {
 
         return std::make_unique<Function>(
             std::vector<lexer::Token>(),
+            implType,
             std::move(name),
             functionType,
             std::move(arguments),

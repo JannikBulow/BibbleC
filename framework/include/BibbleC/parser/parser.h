@@ -63,7 +63,7 @@ namespace bibblec::parser {
         ASTNodePtr parseParenthesizedExpression();
 
         ClassDeclarationPtr parseClassDeclaration();
-        FunctionPtr parseFunction(lexer::SourceLocation sourceStart, Type* returnType);
+        FunctionPtr parseFunction(lexer::SourceLocation sourceStart, Type* returnType, Type* implType);
 
         CompoundStatementPtr parseCompoundStatement();
         IfStatementPtr parseIfStatement();
