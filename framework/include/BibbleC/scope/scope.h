@@ -29,7 +29,7 @@ namespace bibblec::scope {
         using Iterator = BaseIterator<Scope>;
         using ConstIterator = BaseIterator<const Scope>;
 
-        explicit Scope(Scope* parent = nullptr);
+        explicit Scope(std::optional<std::string> moduleName = std::nullopt, Scope* parent = nullptr);
 
         Iterator begin() { return this; }
         Iterator end() { return nullptr; }
@@ -39,6 +39,8 @@ namespace bibblec::scope {
         Scope* getParent() const;
         const std::vector<Scope*>& getChildren() const;
         const std::vector<SymbolPtr>& getSymbols() const;
+
+        std::string_view getModuleName() const;
 
         Symbol* getLatestSymbol() const;
         Symbol* resolveSymbol(std::string_view name) const;
@@ -50,6 +52,7 @@ namespace bibblec::scope {
 
     private:
         Scope* mParent;
+        std::optional<std::string> mModuleName;
         std::vector<Scope*> mChildren;
 
         std::vector<SymbolPtr> mSymbols;

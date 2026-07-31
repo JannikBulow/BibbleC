@@ -3,8 +3,9 @@
 #include "BibbleC/scope/scope.h"
 
 namespace bibblec::scope {
-    Scope::Scope(Scope* parent)
-        : mParent(parent) {
+    Scope::Scope(std::optional<std::string> moduleName, Scope* parent)
+        : mParent(parent)
+        , mModuleName(std::move(moduleName)) {
         if (parent) parent->mChildren.push_back(this);
     }
 
@@ -18,6 +19,13 @@ namespace bibblec::scope {
 
     const std::vector<SymbolPtr>& Scope::getSymbols() const {
         return mSymbols;
+    }
+
+    std::string_view Scope::getModuleName() const {
+        for (const Scope& scope : *this) {
+            if (scope.mModuleName.has_value()) return scope.mModuleName.value();
+        }
+        return "bad scope without module";
     }
 
     Symbol* Scope::getLatestSymbol() const {
