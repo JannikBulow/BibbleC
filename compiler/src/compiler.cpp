@@ -67,7 +67,7 @@ namespace bibblec {
     }
 
     void Compiler::parse(Module& module) {
-        module.globalScope = std::make_unique<scope::Scope>();
+        module.globalScope = std::make_unique<scope::Scope>(module.name);
 
         parser::Parser parser(module.tokens, mDiag, module.globalScope.get());
 
