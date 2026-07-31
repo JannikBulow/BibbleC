@@ -69,7 +69,7 @@ namespace bibblec::parser {
     }
 
     ASTNodePtr Function::cloneExternal(scope::Scope* in) {
-        scope::ScopePtr ownScope = std::make_unique<scope::Scope>(in);
+        scope::ScopePtr ownScope = std::make_unique<scope::Scope>(std::nullopt, in);
         auto functionType = static_cast<FunctionType*>(mType);
         return std::make_unique<Function>(mModifiers, mImplType, mName, functionType, mArguments, std::move(ownScope), std::vector<ASTNodePtr>(), mSource, mBlockEnd);
     }
