@@ -297,7 +297,7 @@ namespace bibblec::parser {
         expectToken(lexer::TokenType::LeftBrace);
         consume();
 
-        scope::ScopePtr scope = std::make_unique<scope::Scope>(mActiveScope);
+        scope::ScopePtr scope = std::make_unique<scope::Scope>(std::nullopt, mActiveScope);
         mActiveScope = scope.get();
 
         while (current().getTokenType() != lexer::TokenType::RightBrace) {
@@ -328,7 +328,7 @@ namespace bibblec::parser {
         SourcePair source;
         source.start = consume().getStartLocation();
 
-        scope::ScopePtr scope = std::make_unique<scope::Scope>(mActiveScope);
+        scope::ScopePtr scope = std::make_unique<scope::Scope>(std::nullopt, mActiveScope);
         mActiveScope = scope.get();
 
         std::vector<ASTNodePtr> body;
