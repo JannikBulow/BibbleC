@@ -228,7 +228,7 @@ namespace bibblec::parser {
         expectToken(lexer::TokenType::Identifier);
         std::string className(consume().getText());
 
-        ClassType* classType = ClassType::Create(className);
+        ClassType* classType = ClassType::Create(std::string(mActiveScope->getModuleName()), className);
 
         expectToken(lexer::TokenType::LeftBrace);
         consume();
