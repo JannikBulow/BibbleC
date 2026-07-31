@@ -8,8 +8,9 @@
 namespace bibblec {
     class BIBBLEC_EXPORT ClassType : public Type {
     public:
-        explicit ClassType(std::string name);
+        ClassType(std::string moduleName, std::string name);
 
+        std::string_view getModuleName() const;
         std::string_view getName() const override;
         int getSize() const override;
 
@@ -21,10 +22,11 @@ namespace bibblec {
         bool isClassType() const override;
 
         static std::vector<ClassType*> GetAllClassTypes();
-        static ClassType* Create(std::string name);
+        static ClassType* Create(std::string moduleName, std::string name);
         static void Reset();
 
     private:
+        std::string mModuleName;
         std::string mName;
     };
 }

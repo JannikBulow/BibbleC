@@ -19,7 +19,7 @@ namespace bibblec::parser {
         if (Type* type = Type::Get(mName)) {
             mType = type;
         } else {
-            mType = ClassType::Create(mName);
+            mType = ClassType::Create(std::string(mScope->getModuleName()), mName);
         }
     }
 

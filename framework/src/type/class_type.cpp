@@ -2,10 +2,17 @@
 
 #include "BibbleC/type/class_type.h"
 
+#include <format>
+
 namespace bibblec {
-    ClassType::ClassType(std::string name)
-        : Type("class " + name)
+    ClassType::ClassType(std::string moduleName, std::string name)
+        : Type(std::format("class {}::{}", moduleName, name))
+        , mModuleName(std::move(moduleName))
         , mName(std::move(name)) {}
+
+    std::string_view ClassType::getModuleName() const {
+        return mModuleName;
+    }
 
     std::string_view ClassType::getName() const {
         return mName;
@@ -16,7 +23,7 @@ namespace bibblec {
     }
 
     bibblir::Type* ClassType::getBibblirType() const {
-        return bibblir::Type::GetClassType();
+        return bibblir::Type::GetClassType(mModuleName, mName);
     }
 
     Type::CastLevel ClassType::castTo(Type* destType) const {
@@ -42,11 +49,11 @@ namespace bibblec {
         return result;
     }
 
-    ClassType* ClassType::Create(std::string name) {
-        auto it = std::ranges::find_if(classTypes, [&name](const auto& type) { return type->getName() == name; });
+    ClassType* ClassType::Create(std::string moduleName, std::string name) {
+        auto it = std::ranges::find_if(classTypes, [&name, &moduleName](const auto& type) { return type->getName() == name && type->getModuleName() == moduleName; });
         if (it != classTypes.end()) return it->get();
 
-        classTypes.push_back(std::make_unique<ClassType>(std::move(name)));
+        classTypes.push_back(std::make_unique<ClassType>(std::move(moduleName), std::move(name)));
         return classTypes.back().get();
     }
 
