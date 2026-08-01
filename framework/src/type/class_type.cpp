@@ -49,9 +49,15 @@ namespace bibblec {
         return result;
     }
 
-    ClassType* ClassType::Create(std::string moduleName, std::string name) {
+    ClassType* ClassType::Get(const std::string& moduleName, const std::string& name) {
         auto it = std::ranges::find_if(classTypes, [&name, &moduleName](const auto& type) { return type->getName() == name && type->getModuleName() == moduleName; });
         if (it != classTypes.end()) return it->get();
+        return nullptr;
+    }
+
+    ClassType* ClassType::Create(std::string moduleName, std::string name) {
+        ClassType* found = Get(moduleName, name);
+        if (found) return found;
 
         classTypes.push_back(std::make_unique<ClassType>(std::move(moduleName), std::move(name)));
         return classTypes.back().get();

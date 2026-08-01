@@ -22,6 +22,7 @@ namespace bibblec {
         bool isClassType() const override;
 
         static std::vector<ClassType*> GetAllClassTypes();
+        static ClassType* Get(const std::string& moduleName, const std::string& name);
         static ClassType* Create(std::string moduleName, std::string name);
         static void Reset();
 
