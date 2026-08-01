@@ -5,13 +5,28 @@
 
 #include "BibbleC/type/type.h"
 
+#include <BibblIR/ir/class.h>
+
 namespace bibblec {
     class BIBBLEC_EXPORT ClassType : public Type {
     public:
+        struct Field {
+            Type* type;
+            std::string name;
+        };
+
         ClassType(std::string moduleName, std::string name);
 
         std::string_view getModuleName() const;
         std::string_view getClassName() const;
+
+        const std::vector<Field>& getFields() const;
+        bool hasField(std::string_view fieldName);
+        Field* getField(std::string_view fieldName);
+        bibblir::Field* getBibblirField(std::string_view fieldName);
+
+        void setFields(std::vector<Field> fields);
+        void setBibblirClass(bibblir::Class* clas);
 
         int getSize() const override;
 
@@ -30,6 +45,9 @@ namespace bibblec {
     private:
         std::string mModuleName;
         std::string mClassName;
+
+        std::optional<std::vector<Field>> mFields;
+        bibblir::Class* mBibblirClass; // to get field nodes
     };
 }
 

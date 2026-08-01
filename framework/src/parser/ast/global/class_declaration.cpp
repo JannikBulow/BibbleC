@@ -21,6 +21,16 @@ namespace bibblec::parser {
         } else {
             mType = ClassType::Create(std::string(mScope->getModuleName()), mName);
         }
+
+        // yeah this is prob fine
+        ClassType* classType = static_cast<ClassType*>(mType);
+
+        std::vector<ClassType::Field> classTypeFields;
+        classTypeFields.reserve(mFields.size());
+        for (auto& field : mFields) {
+            classTypeFields.emplace_back(field.type, field.name);
+        }
+        classType->setFields(classTypeFields);
     }
 
     std::vector<ASTNode*> ClassDeclaration::getChildren() {
@@ -42,6 +52,7 @@ namespace bibblec::parser {
 
     bibblir::Value* ClassDeclaration::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         bibblir::Class* clas = bibblir::Class::Create(module, mName);
+        static_cast<ClassType*>(mType)->setBibblirClass(clas);
 
         for (auto& field : mFields) {
             clas->addField(field.type->getBibblirType(), field.name);
