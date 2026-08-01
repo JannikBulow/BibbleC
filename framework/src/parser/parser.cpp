@@ -86,29 +86,50 @@ namespace bibblec::parser {
     }
 
     Type* Parser::parseType() {
-        expectToken(lexer::TokenType::Type);
-        return Type::Get(consume().getText());
+        auto recoverPosition = mPosition;
+
+        Type* type;
+        if (current().getTokenType() == lexer::TokenType::Identifier) {
+            std::string name(consume().getText());
+
+            if (Type* classType = Type::Get(name)) {
+                type = classType;
+            } else if (ClassType* classType = ClassType::Get(std::string(mActiveScope->getModuleName()), name)) {
+                type = classType;
+            } else {
+                type = nullptr;
+            }
+        } else {
+            if (current().getTokenType() == lexer::TokenType::Type) {
+                type = Type::Get(consume().getText());
+            } else {
+                type = nullptr;
+            }
+        }
+
+        if (!type) mPosition = recoverPosition;
+        return type;
     }
 
     ASTNodePtr Parser::parseGlobal() {
+        lexer::SourceLocation sourceStart = current().getStartLocation();
+
+        if (Type* type = parseType()) {
+            if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
+                return parseFunction(sourceStart, type, nullptr);
+            } else {
+                mDiag.reportCompilerError(
+                    current().getStartLocation(),
+                    current().getEndLocation(),
+                    "expected parsable function (this error message is temporary and will be removed once proper global parsing is done)"
+                );
+                std::exit(1);
+            }
+        }
+
         switch (current().getTokenType()) {
             case lexer::TokenType::ClassKeyword:
                 return parseClassDeclaration();
-
-            case lexer::TokenType::Type: {
-                lexer::SourceLocation sourceStart = current().getStartLocation();
-                Type* type = parseType();
-                if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
-                    return parseFunction(sourceStart, type, nullptr);
-                } else {
-                    mDiag.reportCompilerError(
-                        current().getStartLocation(),
-                        current().getEndLocation(),
-                        "expected parsable function (this error message is temporary and will be removed once proper global parsing is done)"
-                    );
-                    std::exit(1);
-                }
-            }
 
             case lexer::TokenType::EndOfFile:
                 consume();
