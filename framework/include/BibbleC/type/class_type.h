@@ -11,7 +11,8 @@ namespace bibblec {
         ClassType(std::string moduleName, std::string name);
 
         std::string_view getModuleName() const;
-        std::string_view getName() const override;
+        std::string_view getClassName() const;
+
         int getSize() const override;
 
         bibblir::Type* getBibblirType() const override;
@@ -28,7 +29,7 @@ namespace bibblec {
 
     private:
         std::string mModuleName;
-        std::string mName;
+        std::string mClassName;
     };
 }
 

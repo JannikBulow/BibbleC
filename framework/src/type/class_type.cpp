@@ -8,14 +8,14 @@ namespace bibblec {
     ClassType::ClassType(std::string moduleName, std::string name)
         : Type(std::format("class {}::{}", moduleName, name))
         , mModuleName(std::move(moduleName))
-        , mName(std::move(name)) {}
+        , mClassName(std::move(name)) {}
 
     std::string_view ClassType::getModuleName() const {
         return mModuleName;
     }
 
-    std::string_view ClassType::getName() const {
-        return mName;
+    std::string_view ClassType::getClassName() const {
+        return mClassName;
     }
 
     int ClassType::getSize() const {
@@ -23,7 +23,7 @@ namespace bibblec {
     }
 
     bibblir::Type* ClassType::getBibblirType() const {
-        return bibblir::Type::GetClassType(mModuleName, mName);
+        return bibblir::Type::GetClassType(mModuleName, mClassName);
     }
 
     Type::CastLevel ClassType::castTo(Type* destType) const {
@@ -31,7 +31,7 @@ namespace bibblec {
     }
 
     std::string ClassType::getSymbolID(Type* thisType) const {
-        return "C" + mName + ";";
+        return std::format("C{}/{};", mModuleName, mClassName);
     }
 
     bool ClassType::isClassType() const {
@@ -50,7 +50,7 @@ namespace bibblec {
     }
 
     ClassType* ClassType::Get(const std::string& moduleName, const std::string& name) {
-        auto it = std::ranges::find_if(classTypes, [&name, &moduleName](const auto& type) { return type->getName() == name && type->getModuleName() == moduleName; });
+        auto it = std::ranges::find_if(classTypes, [&name, &moduleName](const auto& type) { return type->getClassName() == name && type->getModuleName() == moduleName; });
         if (it != classTypes.end()) return it->get();
         return nullptr;
     }
