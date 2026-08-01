@@ -23,6 +23,7 @@ set(SOURCES
     src/parser/ast/expression/call_expression.cpp
     src/parser/ast/expression/cast_expression.cpp
     src/parser/ast/expression/integer_literal.cpp
+    src/parser/ast/expression/member_access.cpp
     src/parser/ast/expression/unary_expression.cpp
     src/parser/ast/expression/variable_expression.cpp
 
@@ -61,6 +62,7 @@ set(HEADERS
     include/BibbleC/parser/ast/expression/call_expression.h
     include/BibbleC/parser/ast/expression/cast_expression.h
     include/BibbleC/parser/ast/expression/integer_literal.h
+    include/BibbleC/parser/ast/expression/member_access.h
     include/BibbleC/parser/ast/expression/unary_expression.h
     include/BibbleC/parser/ast/expression/variable_expression.h
 
