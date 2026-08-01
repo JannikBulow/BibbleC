@@ -12,6 +12,7 @@
 #include "BibbleC/parser/ast/expression/call_expression.h"
 #include "BibbleC/parser/ast/expression/cast_expression.h"
 #include "BibbleC/parser/ast/expression/integer_literal.h"
+#include "BibbleC/parser/ast/expression/member_access.h"
 #include "BibbleC/parser/ast/expression/unary_expression.h"
 #include "BibbleC/parser/ast/expression/variable_expression.h"
 

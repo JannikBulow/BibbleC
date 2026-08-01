@@ -53,6 +53,7 @@ namespace bibblec::parser {
     int Parser::getBinaryOperatorPrecedence(lexer::TokenType tokenType) {
         switch (tokenType) {
             case lexer::TokenType::LeftParen:
+            case lexer::TokenType::Dot:
                 return 100;
 
             case lexer::TokenType::Star:
@@ -169,6 +170,11 @@ namespace bibblec::parser {
 
             if (operatorToken.getTokenType() == lexer::TokenType::LeftParen) {
                 left = parseCallExpression(std::move(left));
+            } else if (operatorToken.getTokenType() == lexer::TokenType::Dot) {
+                expectToken(lexer::TokenType::Identifier);
+                std::string id(consume().getText());
+                source.end = peek(-1).getEndLocation();
+                left = std::make_unique<MemberAccess>(mActiveScope, std::move(left), std::move(id), source);
             } else {
                 ASTNodePtr right = parseExpression(binaryOperatorPrecedence);
                 source.end = peek(-1).getEndLocation();
