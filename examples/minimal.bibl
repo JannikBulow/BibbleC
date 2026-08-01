@@ -3,12 +3,8 @@ class Test {
     int b;
 
     int add() {
-        return 0;
+        return this.a + this.b;
     }
-}
-
-void test() {
-
 }
 
 int main() {
@@ -20,8 +16,6 @@ int main() {
     } else {
         a = 0;
     }
-
-    test();
 
     return a + b;
 }
