@@ -48,6 +48,10 @@ namespace bibblec {
         return mBibblirClass->addField(field->type->getBibblirType(), field->name);
     }
 
+    bibblir::Class* ClassType::getBibblirClass() const {
+        return mBibblirClass;
+    }
+
     void ClassType::setFields(std::vector<Field> fields) {
         assert(!mFields.has_value());
         mFields = std::move(fields);

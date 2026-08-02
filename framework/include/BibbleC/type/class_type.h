@@ -25,6 +25,8 @@ namespace bibblec {
         Field* getField(std::string_view fieldName);
         bibblir::Field* getBibblirField(std::string_view fieldName);
 
+        bibblir::Class* getBibblirClass() const;
+
         void setFields(std::vector<Field> fields);
         void setBibblirClass(bibblir::Class* clas);
 
