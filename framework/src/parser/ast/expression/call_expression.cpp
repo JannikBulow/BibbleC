@@ -108,7 +108,16 @@ namespace bibblec::parser {
                     it = candidates.erase(it);
                 } else {
                     auto functionType = static_cast<FunctionType*>(candidate->type);
-                    if (functionType->getArgumentTypes().size() != (mParameters.size() + thisParameter)) {
+                    auto& arguments = functionType->getArgumentTypes();
+
+                    if (auto memberAccess = dynamic_cast<MemberAccess*>(mCallee.get())) {
+                        if (!arguments.empty() && arguments[0] != memberAccess->mClassType) {
+                            it = candidates.erase(it);
+                            continue;
+                        }
+                    }
+
+                    if (arguments.size() != (mParameters.size() + thisParameter)) {
                         it = candidates.erase(it);
                     } else {
                         ++it;
@@ -127,7 +136,7 @@ namespace bibblec::parser {
                     Type::CastLevel castLevel = mParameters[i]->getType()->castTo(functionType->getArgumentTypes()[i + thisParameter]);
                     int multiplier = 0;
 
-                    if (mParameters[i]->getType() == functionType->getArgumentTypes()[i]) multiplier = 0;
+                    if (mParameters[i]->getType() == functionType->getArgumentTypes()[i + thisParameter]) multiplier = 0;
                     else if (castLevel == Type::CastLevel::Implicit) multiplier = 1;
                     else if (castLevel == Type::CastLevel::ImplicitWarning) multiplier = 2;
                     else disallowed = true;
