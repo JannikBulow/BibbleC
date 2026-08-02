@@ -17,10 +17,12 @@ namespace bibblec::parser {
             case Constructor:
                 this->dispatch = NonVirtual;
                 this->impl->mName = ".init";
+                this->impl->mSymbol->name = ".init";
                 break;
             case Finalizer:
                 this->dispatch = Virtual;
                 this->impl->mName = ".finalize";
+                this->impl->mSymbol->name = ".finalize";
                 break;
         }
     }
