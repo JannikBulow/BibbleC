@@ -7,7 +7,7 @@
 
 namespace bibblec {
     ClassType::ClassType(std::string moduleName, std::string name)
-        : Type(std::format("class {}::{}", moduleName, name))
+        : Type(std::format("{}::{}", moduleName, name))
         , mModuleName(std::move(moduleName))
         , mClassName(std::move(name))
         , mBibblirClass(nullptr) {}
