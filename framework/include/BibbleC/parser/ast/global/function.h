@@ -33,6 +33,7 @@ namespace bibblec::parser {
     };
 
     class BIBBLEC_EXPORT Function : public ASTNode {
+        friend struct ClassMethod;
     public:
         Function(
             std::vector<lexer::Token> modifierTokens,

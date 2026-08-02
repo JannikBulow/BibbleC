@@ -16,10 +16,22 @@ namespace bibblec::parser {
     };
 
     struct ClassMethod {
-        FunctionPtr impl;
-        bool isVirtual = false; // will soon be used
+        enum Kind {
+            Normal,
+            Constructor,
+            Finalizer
+        };
 
-        ClassMethod(FunctionPtr impl) : impl(std::move(impl)) {}
+        enum Dispatch {
+            NonVirtual,
+            Virtual
+        };
+
+        FunctionPtr impl;
+        Kind kind;
+        Dispatch dispatch;
+
+        ClassMethod(FunctionPtr impl, Kind kind = Normal, Dispatch dispatch = NonVirtual);
     };
 
     class BIBBLEC_EXPORT ClassDeclaration : public ASTNode {

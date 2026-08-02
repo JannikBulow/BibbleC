@@ -7,6 +7,24 @@
 #include <BibblIR/ir/class.h>
 
 namespace bibblec::parser {
+    ClassMethod::ClassMethod(FunctionPtr impl, Kind kind, Dispatch dispatch)
+        : impl(std::move(impl))
+        , kind(kind)
+        , dispatch(dispatch) {
+        switch (kind) {
+            case Normal:
+                break;
+            case Constructor:
+                this->dispatch = NonVirtual;
+                this->impl->mName = ".init";
+                break;
+            case Finalizer:
+                this->dispatch = Virtual;
+                this->impl->mName = ".finalize";
+                break;
+        }
+    }
+
     ClassDeclaration::ClassDeclaration(scope::Scope* scope, std::string name, std::vector<ClassField> fields, std::vector<ClassMethod> methods, SourcePair source)
         : ASTNode(scope, source)
         , mName(std::move(name))
@@ -59,8 +77,12 @@ namespace bibblec::parser {
         }
 
         for (auto& method : mMethods) {
-            bibblir::Value* impl = method.impl->codegen(builder, module, diag);
-            if (method.isVirtual) {
+            bibblir::Value* impl = nullptr;
+            if (method.impl) {
+                impl = method.impl->codegen(builder, module, diag);
+            }
+
+            if (method.dispatch == ClassMethod::Virtual) {
                 clas->addMethod(static_cast<bibblir::FunctionType*>(method.impl->getType()->getBibblirType()), std::string(method.impl->getName()), impl);
             }
         }
