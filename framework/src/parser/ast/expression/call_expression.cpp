@@ -1,6 +1,7 @@
 // Copyright 2026 Jannik Laugmand Bülow
 
 #include "BibbleC/parser/ast/expression/call_expression.h"
+#include "BibbleC/parser/ast/expression/member_access.h"
 #include "BibbleC/parser/ast/expression/variable_expression.h"
 
 #include "BibbleC/type/function_type.h"
@@ -9,11 +10,13 @@
 
 #include <algorithm>
 
+
 namespace bibblec::parser {
     CallExpression::CallExpression(scope::Scope* scope, ASTNodePtr callee, std::vector<ASTNodePtr> parameters, SourcePair source)
         : ASTNode(scope, source)
         , mCallee(std::move(callee))
         , mParameters(std::move(parameters))
+        , mIsMemberFunction(false)
         , mBestViableFunction(nullptr) {}
 
     std::vector<ASTNode*> CallExpression::getChildren() {
@@ -30,7 +33,12 @@ namespace bibblec::parser {
         bibblir::Value* callee = mBestViableFunction->getLatestValue()->value;
 
         std::vector<bibblir::Value*> parameters;
-        parameters.reserve(mParameters.size());
+        parameters.reserve(mParameters.size() + (mIsMemberFunction ? 1 : 0));
+
+        if (auto memberAccess = dynamic_cast<MemberAccess*>(mCallee.get())) {
+            parameters.push_back(memberAccess->mObject->codegen(builder, module, diag));
+        }
+
         for (auto& parameter : mParameters) {
             parameters.push_back(parameter->codegen(builder, module, diag));
         }
@@ -56,7 +64,9 @@ namespace bibblec::parser {
 
         unsigned int index = 0;
         for (auto& parameter : mParameters) {
-            auto argumentType = functionType->getArgumentTypes()[index++];
+            auto argumentType = functionType->getArgumentTypes()[index + (mIsMemberFunction ? 1 : 0)];
+            index++;
+
             if (parameter->getType() != argumentType) {
                 if (parameter->canImplicitCast(diag, argumentType)) {
                     parameter = CastTo(parameter, argumentType);
@@ -77,9 +87,20 @@ namespace bibblec::parser {
     };
 
     scope::Symbol* CallExpression::getBestViableFunction(diagnostic::Diagnostics& diag) {
-        if (auto var = dynamic_cast<VariableExpression*>(mCallee.get())) {
-            std::vector<scope::Symbol*> candidates = mScope->getCandidateFunctions(var->getName());
-            std::string errorName(var->getName());
+        if (dynamic_cast<VariableExpression*>(mCallee.get()) || dynamic_cast<MemberAccess*>(mCallee.get())) {
+            std::vector<scope::Symbol*> candidates;
+            std::string errorName;
+            int thisParameter = 0;
+
+            if (auto var = dynamic_cast<VariableExpression*>(mCallee.get())) {
+                candidates = mScope->getCandidateFunctions(var->getName());
+                errorName = var->getName();
+            } else if (auto memberAccess = dynamic_cast<MemberAccess*>(mCallee.get())) {
+                mIsMemberFunction = true;
+                candidates = mScope->getCandidateFunctions(memberAccess->mId);
+                errorName = std::format("{}::{}", memberAccess->mClassType->getName(), memberAccess->mId);
+                thisParameter = 1;
+            }
 
             for (auto it = candidates.begin(); it != candidates.end();) {
                 scope::Symbol* candidate = *it;
@@ -87,7 +108,7 @@ namespace bibblec::parser {
                     it = candidates.erase(it);
                 } else {
                     auto functionType = static_cast<FunctionType*>(candidate->type);
-                    if (functionType->getArgumentTypes().size() != mParameters.size()) {
+                    if (functionType->getArgumentTypes().size() != (mParameters.size() + thisParameter)) {
                         it = candidates.erase(it);
                     } else {
                         ++it;
@@ -103,7 +124,7 @@ namespace bibblec::parser {
                 size_t i = 0;
 
                 for (; i < mParameters.size(); i++) {
-                    Type::CastLevel castLevel = mParameters[i]->getType()->castTo(functionType->getArgumentTypes()[i]);
+                    Type::CastLevel castLevel = mParameters[i]->getType()->castTo(functionType->getArgumentTypes()[i + thisParameter]);
                     int multiplier = 0;
 
                     if (mParameters[i]->getType() == functionType->getArgumentTypes()[i]) multiplier = 0;

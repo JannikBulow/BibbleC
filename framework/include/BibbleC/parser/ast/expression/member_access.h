@@ -9,6 +9,7 @@
 
 namespace bibblec::parser {
     class BIBBLEC_EXPORT MemberAccess : public ASTNode {
+        friend class CallExpression;
     public:
         MemberAccess(scope::Scope* scope, ASTNodePtr object, std::string id, SourcePair source);
 

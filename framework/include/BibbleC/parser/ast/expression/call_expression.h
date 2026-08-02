@@ -20,6 +20,7 @@ namespace bibblec::parser {
         ASTNodePtr mCallee;
         std::vector<ASTNodePtr> mParameters;
 
+        bool mIsMemberFunction;
         scope::Symbol* mBestViableFunction;
 
         scope::Symbol* getBestViableFunction(diagnostic::Diagnostics& diag);
