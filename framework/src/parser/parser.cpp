@@ -186,6 +186,12 @@ namespace bibblec::parser {
     }
 
     ASTNodePtr Parser::parsePrimary() {
+        lexer::SourceLocation sourceStart = current().getStartLocation();
+
+        if (Type* type = parseType()) {
+            return parseVariableDeclaration(sourceStart, type);
+        }
+
         switch (current().getTokenType()) {
             case lexer::TokenType::LeftBrace:
                 return parseCompoundStatement();
@@ -195,9 +201,6 @@ namespace bibblec::parser {
 
             case lexer::TokenType::ReturnKeyword:
                 return parseReturnStatement();
-
-            case lexer::TokenType::Type:
-                return parseVariableDeclaration();
 
 
             case lexer::TokenType::IntegerLiteral:
@@ -215,6 +218,9 @@ namespace bibblec::parser {
 
             case lexer::TokenType::LeftParen:
                 return parseParenthesizedExpression();
+
+            case lexer::TokenType::NewKeyword:
+                return parseNewExpression();
 
             default:
                 mDiag.reportCompilerError(
@@ -294,6 +300,8 @@ namespace bibblec::parser {
 
         expectToken(lexer::TokenType::Identifier);
         std::string name(consume().getText());
+
+        if (implType && name == "init") name = ".init";
 
         expectToken(lexer::TokenType::LeftParen);
         consume();
@@ -417,11 +425,9 @@ namespace bibblec::parser {
         return std::make_unique<ReturnStatement>(mActiveScope, std::move(returnValue), source);
     }
 
-    VariableDeclarationPtr Parser::parseVariableDeclaration() {
+    VariableDeclarationPtr Parser::parseVariableDeclaration(lexer::SourceLocation sourceStart, Type* type) {
         SourcePair source;
-        source.start = current().getStartLocation();
-
-        Type* type = parseType();
+        source.start = sourceStart;
 
         expectToken(lexer::TokenType::Identifier);
         std::string name(consume().getText());
@@ -479,5 +485,28 @@ namespace bibblec::parser {
         source.end = consume().getEndLocation();
 
         return std::make_unique<CallExpression>(mActiveScope, std::move(callee), std::move(parameters), source);
+    }
+
+    NewExpressionPtr Parser::parseNewExpression() {
+        SourcePair source;
+        source.start = consume().getStartLocation();
+
+        Type* allocatedType = parseType();
+
+        expectToken(lexer::TokenType::LeftParen);
+        consume();
+
+        std::vector<ASTNodePtr> parameters;
+        while (current().getTokenType() != lexer::TokenType::RightParen) {
+            parameters.push_back(parseExpression());
+
+            if (current().getTokenType() != lexer::TokenType::RightParen) {
+                expectToken(lexer::TokenType::Comma);
+                consume();
+            }
+        }
+        source.end = consume().getEndLocation();
+
+        return std::make_unique<NewExpression>(mActiveScope, allocatedType, std::move(parameters), source);
     }
 }

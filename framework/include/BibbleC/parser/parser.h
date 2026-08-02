@@ -13,6 +13,7 @@
 #include "BibbleC/parser/ast/expression/cast_expression.h"
 #include "BibbleC/parser/ast/expression/integer_literal.h"
 #include "BibbleC/parser/ast/expression/member_access.h"
+#include "BibbleC/parser/ast/expression/new_expression.h"
 #include "BibbleC/parser/ast/expression/unary_expression.h"
 #include "BibbleC/parser/ast/expression/variable_expression.h"
 
@@ -69,13 +70,14 @@ namespace bibblec::parser {
         CompoundStatementPtr parseCompoundStatement();
         IfStatementPtr parseIfStatement();
         ReturnStatementPtr parseReturnStatement();
-        VariableDeclarationPtr parseVariableDeclaration();
+        VariableDeclarationPtr parseVariableDeclaration(lexer::SourceLocation sourceStart, Type* type);
 
         IntegerLiteralPtr parseIntegerLiteral();
         IntegerLiteralPtr parseCharacterLiteral();
         BooleanLiteralPtr parseBooleanLiteral();
         VariableExpressionPtr parseVariableExpression();
         CallExpressionPtr parseCallExpression(ASTNodePtr callee);
+        NewExpressionPtr parseNewExpression();
     };
 }
 
