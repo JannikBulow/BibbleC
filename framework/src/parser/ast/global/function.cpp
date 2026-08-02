@@ -185,7 +185,6 @@ namespace bibblec::parser {
 
     std::string Function::mangleName() {
         if (mName == "main") return ".main";
-        if (mName.starts_with('.')) return mName;
 
         FunctionType* functionType = static_cast<FunctionType*>(mType);
 
