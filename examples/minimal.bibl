@@ -1,27 +1,15 @@
-class Test {
-    int a;
-    int b;
-
-    Test() {
-        this.a = 1;
-        this.b = 2;
-    }
-
-    int getA() {
-        return this.a;
-    }
-
-    int getB() {
-        return this.b;
-    }
-
-    int add() {
-        return this.getA() + this.getB();
-    }
-}
-
 int main() {
-    Test test = new Test();
+    int x;
 
-   return test.add();
+    if (true) {
+        x = 1;
+    } else {
+        x = 2;
+    }
+
+    while (true) {
+        return x;
+    }
+
+    return 0;
 }
