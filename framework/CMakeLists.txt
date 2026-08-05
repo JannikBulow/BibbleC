@@ -35,6 +35,7 @@ set(SOURCES
     src/parser/ast/statement/if_statement.cpp
     src/parser/ast/statement/return_statement.cpp
     src/parser/ast/statement/variable_declaration.cpp
+    src/parser/ast/statement/while_statement.cpp
 
     src/parser/ast/node.cpp
 
@@ -75,6 +76,7 @@ set(HEADERS
     include/BibbleC/parser/ast/statement/if_statement.h
     include/BibbleC/parser/ast/statement/return_statement.h
     include/BibbleC/parser/ast/statement/variable_declaration.h
+    include/BibbleC/parser/ast/statement/while_statement.h
 
     include/BibbleC/parser/ast/node.h
 
