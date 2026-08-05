@@ -24,6 +24,7 @@
 #include "BibbleC/parser/ast/statement/if_statement.h"
 #include "BibbleC/parser/ast/statement/return_statement.h"
 #include "BibbleC/parser/ast/statement/variable_declaration.h"
+#include "BibbleC/parser/ast/statement/while_statement.h"
 
 #include "BibbleC/parser/ast/node.h"
 
@@ -71,6 +72,7 @@ namespace bibblec::parser {
         IfStatementPtr parseIfStatement();
         ReturnStatementPtr parseReturnStatement();
         VariableDeclarationPtr parseVariableDeclaration(lexer::SourceLocation sourceStart, Type* type);
+        WhileStatementPtr parseWhileStatement();
 
         IntegerLiteralPtr parseIntegerLiteral();
         IntegerLiteralPtr parseCharacterLiteral();
