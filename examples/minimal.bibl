@@ -2,17 +2,17 @@ class Test {
     int a;
     int b;
 
+    Test() {
+        this.a = 1;
+        this.b = 2;
+    }
+
     int getA() {
         return this.a;
     }
 
     int getB() {
         return this.b;
-    }
-
-    void init() {
-        this.a = 1;
-        this.b = 2;
     }
 
     int add() {
