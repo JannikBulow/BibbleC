@@ -38,6 +38,8 @@ tokens bibblec {
 
     if
     else
+    while
+    for
 
     auto Type
     void Type
