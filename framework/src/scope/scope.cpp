@@ -71,4 +71,16 @@ namespace bibblec::scope {
     void Scope::setCurrentReturnType(Type* type) {
         mCurrentReturnType = type;
     }
+
+    bibblir::BasicBlock*& Scope::continueBB() {
+        return mContinueBB;
+    }
+
+    bibblir::BasicBlock*& Scope::breakBB() {
+        return mBreakBB;
+    }
+
+    std::string& Scope::label() {
+        return mLabel;
+    }
 }

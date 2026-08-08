@@ -9,6 +9,8 @@
 
 #include "BibbleC/api.h"
 
+#include <BibblIR/ir/basicblock.h>
+
 namespace bibblec::scope {
     class BIBBLEC_EXPORT Scope {
     public:
@@ -50,6 +52,10 @@ namespace bibblec::scope {
         Type* getCurrentReturnType() const;
         void setCurrentReturnType(Type* type);
 
+        bibblir::BasicBlock*& continueBB();
+        bibblir::BasicBlock*& breakBB();
+        std::string& label();
+
     private:
         Scope* mParent;
         std::optional<std::string> mModuleName;
@@ -58,6 +64,10 @@ namespace bibblec::scope {
         std::vector<SymbolPtr> mSymbols;
 
         Type* mCurrentReturnType = nullptr;
+
+        bibblir::BasicBlock* mContinueBB;
+        bibblir::BasicBlock* mBreakBB;
+        std::string mLabel;
     };
 
     using ScopePtr = std::unique_ptr<Scope>;
