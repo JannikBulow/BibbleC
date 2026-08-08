@@ -109,7 +109,7 @@ namespace bibblec {
 
         std::cout << "\n\n";
 
-        bibbleasm::Module builtModule = std::move(module.module.bytecodeModule().value());
+        bibbleasm::Module builtModule = module.module.bytecodeModule().build();
 
         bibblebytecode::WritableByteBuffer buffer;
         if (!bibblebytecode::writer::WriteModule(buffer, builtModule.module())) {
