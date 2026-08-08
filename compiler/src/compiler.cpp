@@ -11,6 +11,8 @@
 
 #include <BibblIR/pass/codegen/codegen.h>
 
+#include <BibblIR/pass/optimizer/peephole.h>
+
 #include <BibblIR/pass/pass_manager.h>
 
 #include <BibblIR/visitor/print_visitor.h>
@@ -104,6 +106,7 @@ namespace bibblec {
         bibblir::PassRegistry passRegistry = bibblir::PassRegistry::Default();
         bibblir::PassManager passManager(passRegistry);
         passManager.addPass(passRegistry.create(bibblir::GetPassID<bibblir::CodegenPass>()));
+        passManager.addPass(passRegistry.create(bibblir::GetPassID<bibblir::PeepholePass>()));
 
         passManager.buildPipeline().run(module.module);
 
