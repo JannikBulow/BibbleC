@@ -9,7 +9,10 @@
 
 #include <BibbleC/parser/parser.h>
 
-#include <BibblIR/visitor/codegen_visitor.h>
+#include <BibblIR/pass/codegen/codegen.h>
+
+#include <BibblIR/pass/pass_manager.h>
+
 #include <BibblIR/visitor/print_visitor.h>
 
 #include <algorithm>
@@ -96,14 +99,17 @@ namespace bibblec {
         bibblir::PrintVisitor printer(std::cout);
         module.module.accept(printer);
 
-        bibblir::CodegenVisitor codegen;
-        module.module.accept(codegen);
-
-        std::cout << "\n\n";
-        codegen.printDisassembly(std::cout);
         std::cout << "\n\n";
 
-        bibbleasm::Module builtModule = codegen.buildModule();
+        bibblir::PassRegistry passRegistry = bibblir::PassRegistry::Default();
+        bibblir::PassManager passManager(passRegistry);
+        passManager.addPass(passRegistry.create(bibblir::GetPassID<bibblir::CodegenPass>()));
+
+        passManager.buildPipeline().run(module.module);
+
+        std::cout << "\n\n";
+
+        bibbleasm::Module builtModule = std::move(module.module.bytecodeModule().value());
 
         bibblebytecode::WritableByteBuffer buffer;
         if (!bibblebytecode::writer::WriteModule(buffer, builtModule.module())) {
