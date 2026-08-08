@@ -52,6 +52,8 @@ namespace bibblec::parser {
         mBody->codegen(builder, module, diag);
         if (!builder.getInsertPoint()->hasTerminator()) mCondition->ccodegen(builder, module, diag, bodyBB, mergeBB);
 
+        builder.getInsertPoint()->loopEnd() = mergeBB;
+
         for (size_t i = 0; i < phis.size(); i++) {
             if (!phis[i]) continue;
 
