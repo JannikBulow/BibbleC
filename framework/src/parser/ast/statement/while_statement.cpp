@@ -21,6 +21,8 @@ namespace bibblec::parser {
         bibblir::BasicBlock* bodyBB = builder.getInsertPoint()->getParent()->createBasicBlock("");
         bibblir::BasicBlock* mergeBB = builder.getInsertPoint()->getParent()->createBasicBlock("");
 
+        // TODO: continue and break bb
+
         std::vector<scope::Symbol*> symbols;
         std::vector<bibblir::PhiInstruction*> phis;
         for (const auto& scope : *mScope) {
