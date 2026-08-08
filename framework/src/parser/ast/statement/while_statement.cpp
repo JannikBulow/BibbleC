@@ -50,7 +50,7 @@ namespace bibblec::parser {
             symbol->values.emplace_back(bodyBB, phi);
         }
         mBody->codegen(builder, module, diag);
-        if (!bodyBB->hasTerminator()) mCondition->ccodegen(builder, module, diag, bodyBB, mergeBB);
+        if (!builder.getInsertPoint()->hasTerminator()) mCondition->ccodegen(builder, module, diag, bodyBB, mergeBB);
 
         for (size_t i = 0; i < phis.size(); i++) {
             if (!phis[i]) continue;
