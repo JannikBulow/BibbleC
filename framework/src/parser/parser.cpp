@@ -196,6 +196,9 @@ namespace bibblec::parser {
             case lexer::TokenType::LeftBrace:
                 return parseCompoundStatement();
 
+            case lexer::TokenType::ForKeyword:
+                return parseForStatement();
+
             case lexer::TokenType::IfKeyword:
                 return parseIfStatement();
 
@@ -463,6 +466,31 @@ namespace bibblec::parser {
         mActiveScope = scope->getParent();
 
         return std::make_unique<CompoundStatement>(std::move(body), std::move(scope), source);
+    }
+
+    ForStatementPtr Parser::parseForStatement() {
+        SourcePair source;
+        source.start = consume().getStartLocation();
+
+        expectToken(lexer::TokenType::LeftParen);
+        consume();
+
+        auto init = parseExpression();
+        expectToken(lexer::TokenType::Semicolon);
+        consume();
+
+        auto condition = parseExpression();
+        expectToken(lexer::TokenType::Semicolon);
+        consume();
+
+        auto it = parseExpression();
+
+        expectToken(lexer::TokenType::RightParen);
+        source.end = consume().getEndLocation();
+
+        auto body = parseExpression();
+
+        return std::make_unique<ForStatement>(std::move(init), std::move(condition), std::move(it), std::move(body), mActiveScope, source);
     }
 
     IfStatementPtr Parser::parseIfStatement() {
