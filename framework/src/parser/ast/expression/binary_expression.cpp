@@ -30,6 +30,24 @@ namespace bibblec::parser {
             case lexer::TokenType::Percent:
                 mOperator = Mod;
                 break;
+            case lexer::TokenType::DoubleEqual:
+                mOperator = Equal;
+                break;
+            case lexer::TokenType::BangEqual:
+                mOperator = NotEqual;
+                break;
+            case lexer::TokenType::LessThan:
+                mOperator = LessThan;
+                break;
+            case lexer::TokenType::GreaterThan:
+                mOperator = GreaterThan;
+                break;
+            case lexer::TokenType::LessEqual:
+                mOperator = LessOrEqual;
+                break;
+            case lexer::TokenType::GreaterEqual:
+                mOperator = GreaterOrEqual;
+                break;
             case lexer::TokenType::Equal:
                 mOperator = Assign;
                 break;
@@ -112,6 +130,20 @@ namespace bibblec::parser {
 
                 diag.reportCompilerError(mSource, "can't divide a non-integer type"); // this probably shouldn't say divide, but idk what the verb for modulo is
                 std::exit(1);
+
+            case Equal:
+                return builder.createCmpEQ(left, right);
+            case NotEqual:
+                return builder.createCmpNE(left, right);
+            case LessThan:
+                return builder.createCmpLT(left, right);
+            case GreaterThan:
+                return builder.createCmpGT(left, right);
+            case LessOrEqual:
+                return builder.createCmpLE(left, right);
+            case GreaterOrEqual:
+                return builder.createCmpGE(left, right);
+
             case Assign:
                 return createAssign(left, right);
             case AddAssign: {
@@ -153,6 +185,38 @@ namespace bibblec::parser {
         return nullptr;
     }
 
+    bibblir::Value* BinaryExpression::ccodegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag, bibblir::BasicBlock* trueBB, bibblir::BasicBlock* falseBB) {
+        bibblir::Value* condition;
+        bibblir::Value* left = mLeft->codegen(builder, module, diag);
+        bibblir::Value* right = mRight->codegen(builder, module, diag);
+        switch (mOperator) {
+            case Equal:
+                condition = builder.createCmpEQ(left, right);
+                break;
+            case NotEqual:
+                condition = builder.createCmpNE(left, right);
+                break;
+            case LessThan:
+                condition = builder.createCmpLT(left, right);
+                break;
+            case GreaterThan:
+                condition = builder.createCmpGT(left, right);
+                break;
+            case LessOrEqual:
+                condition = builder.createCmpLE(left, right);
+                break;
+            case GreaterOrEqual:
+                condition = builder.createCmpGE(left, right);
+                break;
+
+            default:
+                return ASTNode::ccodegen(builder, module, diag, trueBB, falseBB);
+        }
+        builder.createCondBr(condition, trueBB, falseBB);
+
+        return nullptr;
+    }
+
     void BinaryExpression::typeCheck(diagnostic::Diagnostics& diag, bool& exit) {
         mLeft->typeCheck(diag, exit);
         mRight->typeCheck(diag, exit);
@@ -184,6 +248,36 @@ namespace bibblec::parser {
                     exit = true;
                 }
                 mType = mLeft->getType();
+                break;
+
+            case Equal:
+            case NotEqual:
+            case LessThan:
+            case GreaterThan:
+            case LessOrEqual:
+            case GreaterOrEqual:
+                if (mLeft->getType()->getSize() > mRight->getType()->getSize()) {
+                    if (mRight->canImplicitCast(diag, mLeft->getType())) {
+                        mRight = CastTo(mRight, mLeft->getType());
+                    }
+                } else {
+                    if (mLeft->canImplicitCast(diag, mRight->getType())) {
+                        mLeft = CastTo(mLeft, mRight->getType());
+                    }
+                }
+
+                if (mLeft->getType() != mRight->getType()) {
+                    diag.reportCompilerError(mSource,
+                        std::format("no match for '{}operator{}{}' with types '{}{}{}' and '{}{}{}'",
+                            fmt::bold, mOperatorToken.getName(), fmt::reset,
+                            fmt::bold, mLeft->getType()->getName(), fmt::reset,
+                            fmt::bold, mRight->getType()->getName(), fmt::reset)
+                    );
+                    exit = true;
+                }
+
+                mType = Type::Get("bool");
+
                 break;
 
             case Assign:

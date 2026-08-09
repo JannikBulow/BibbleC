@@ -64,6 +64,16 @@ namespace bibblec::parser {
             case lexer::TokenType::Minus:
                 return 70;
 
+            case lexer::TokenType::LessThan:
+            case lexer::TokenType::GreaterThan:
+            case lexer::TokenType::LessEqual:
+            case lexer::TokenType::GreaterEqual:
+                return 55;
+
+            case lexer::TokenType::DoubleEqual:
+            case lexer::TokenType::BangEqual:
+                return 50;
+
             case lexer::TokenType::Equal:
             case lexer::TokenType::PlusEqual:
             case lexer::TokenType::MinusEqual:

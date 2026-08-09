@@ -17,6 +17,13 @@ namespace bibblec::parser {
             Div,
             Mod,
 
+            Equal,
+            NotEqual,
+            LessThan,
+            GreaterThan,
+            LessOrEqual,
+            GreaterOrEqual,
+
             Assign,
             AddAssign,
             SubAssign,
@@ -30,6 +37,7 @@ namespace bibblec::parser {
         std::vector<ASTNode*> getChildren() override;
 
         bibblir::Value* codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) override;
+        bibblir::Value* ccodegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag, bibblir::BasicBlock* trueBB, bibblir::BasicBlock* falseBB) override;
 
         void typeCheck(diagnostic::Diagnostics& diag, bool& exit) override;
 
