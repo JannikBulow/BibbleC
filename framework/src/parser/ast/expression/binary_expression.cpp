@@ -8,6 +8,8 @@
 #include <BibblIR/ir/instruction/binary_instruction.h>
 #include <BibblIR/ir/instruction/load_instruction.h>
 
+#include "BibblIR/ir/function.h"
+
 namespace bibblec::parser {
     BinaryExpression::BinaryExpression(scope::Scope* scope, ASTNodePtr left, lexer::Token operatorToken, ASTNodePtr right, SourcePair source)
         : ASTNode(scope, std::move(source))
@@ -47,6 +49,12 @@ namespace bibblec::parser {
                 break;
             case lexer::TokenType::GreaterEqual:
                 mOperator = GreaterOrEqual;
+                break;
+            case lexer::TokenType::DoubleAmpersand:
+                mOperator = LogicalAnd;
+                break;
+            case lexer::TokenType::DoublePipe:
+                mOperator = LogicalOr;
                 break;
             case lexer::TokenType::Equal:
                 mOperator = Assign;
@@ -186,33 +194,47 @@ namespace bibblec::parser {
     }
 
     bibblir::Value* BinaryExpression::ccodegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag, bibblir::BasicBlock* trueBB, bibblir::BasicBlock* falseBB) {
-        bibblir::Value* condition;
-        bibblir::Value* left = mLeft->codegen(builder, module, diag);
-        bibblir::Value* right = mRight->codegen(builder, module, diag);
-        switch (mOperator) {
-            case Equal:
-                condition = builder.createCmpEQ(left, right);
-                break;
-            case NotEqual:
-                condition = builder.createCmpNE(left, right);
-                break;
-            case LessThan:
-                condition = builder.createCmpLT(left, right);
-                break;
-            case GreaterThan:
-                condition = builder.createCmpGT(left, right);
-                break;
-            case LessOrEqual:
-                condition = builder.createCmpLE(left, right);
-                break;
-            case GreaterOrEqual:
-                condition = builder.createCmpGE(left, right);
-                break;
+        if (mOperator == LogicalAnd) {
+            bibblir::BasicBlock* newBB = builder.getInsertPoint()->getParent()->createBasicBlock("");
 
-            default:
-                return ASTNode::ccodegen(builder, module, diag, trueBB, falseBB);
+            mLeft->ccodegen(builder, module, diag, newBB, falseBB);
+            builder.setInsertPoint(newBB);
+            mRight->ccodegen(builder, module, diag, trueBB, falseBB);
+        } else if (mOperator == LogicalOr) {
+            bibblir::BasicBlock* newBB = builder.getInsertPoint()->getParent()->createBasicBlock("");
+
+            mLeft->ccodegen(builder, module, diag, trueBB, newBB);
+            builder.setInsertPoint(newBB);
+            mRight->ccodegen(builder, module, diag, trueBB, falseBB);
+        } else {
+            bibblir::Value* condition;
+            bibblir::Value* left = mLeft->codegen(builder, module, diag);
+            bibblir::Value* right = mRight->codegen(builder, module, diag);
+            switch (mOperator) {
+                case Equal:
+                    condition = builder.createCmpEQ(left, right);
+                    break;
+                case NotEqual:
+                    condition = builder.createCmpNE(left, right);
+                    break;
+                case LessThan:
+                    condition = builder.createCmpLT(left, right);
+                    break;
+                case GreaterThan:
+                    condition = builder.createCmpGT(left, right);
+                    break;
+                case LessOrEqual:
+                    condition = builder.createCmpLE(left, right);
+                    break;
+                case GreaterOrEqual:
+                    condition = builder.createCmpGE(left, right);
+                    break;
+
+                default:
+                    return ASTNode::ccodegen(builder, module, diag, trueBB, falseBB);
+            }
+            builder.createCondBr(condition, trueBB, falseBB);
         }
-        builder.createCondBr(condition, trueBB, falseBB);
 
         return nullptr;
     }
@@ -279,6 +301,32 @@ namespace bibblec::parser {
                 mType = Type::Get("bool");
 
                 break;
+
+            case LogicalAnd:
+            case LogicalOr: {
+                Type* boolType = Type::Get("bool");
+
+                auto checkOperand = [&](ASTNodePtr& operand) {
+                    if (!operand->getType()->isBooleanType()) {
+                        if (operand->canImplicitCast(diag, boolType)) {
+                            operand = CastTo(operand, boolType);
+                        } else {
+                            diag.reportCompilerError(mSource,
+                                std::format("no match for '{}operator{}{}' with types '{}{}{}' and '{}{}{}'",
+                                    fmt::bold, mOperatorToken.getName(), fmt::reset,
+                                    fmt::bold, mLeft->getType()->getName(), fmt::reset,
+                                    fmt::bold, mRight->getType()->getName(), fmt::reset)
+                            );
+                            exit = true;
+                        }
+                    }
+                };
+
+                checkOperand(mLeft);
+                checkOperand(mRight);
+                mType = boolType;
+                break;
+            }
 
             case Assign:
                 if (mLeft->getType() != mRight->getType()) {

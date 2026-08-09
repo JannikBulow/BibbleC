@@ -24,6 +24,9 @@ namespace bibblec::parser {
             LessOrEqual,
             GreaterOrEqual,
 
+            LogicalAnd,
+            LogicalOr,
+
             Assign,
             AddAssign,
             SubAssign,
