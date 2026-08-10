@@ -68,8 +68,8 @@ namespace bibblec::scope {
 
         Type* mCurrentReturnType = nullptr;
 
-        bibblir::BasicBlock* mContinueBB;
-        bibblir::BasicBlock* mBreakBB;
+        bibblir::BasicBlock* mContinueBB = nullptr;
+        bibblir::BasicBlock* mBreakBB = nullptr;
         std::string mLabel;
     };
 
