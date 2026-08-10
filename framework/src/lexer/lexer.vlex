@@ -50,6 +50,8 @@ tokens bibblec {
     else
     while
     for
+    continue
+    break
 
     auto Type
     void Type
