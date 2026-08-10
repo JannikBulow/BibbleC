@@ -19,9 +19,11 @@ namespace bibblec::parser {
     bibblir::Value* WhileStatement::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         bibblir::BasicBlock* startBB = builder.getInsertPoint();
         bibblir::BasicBlock* bodyBB = builder.getInsertPoint()->getParent()->createBasicBlock("");
+        bibblir::BasicBlock* conditionBB = builder.getInsertPoint()->getParent()->createBasicBlock("");
         bibblir::BasicBlock* mergeBB = builder.getInsertPoint()->getParent()->createBasicBlock("");
 
-        // TODO: continue and break bb
+        mScope->continueBB() = conditionBB;
+        mScope->breakBB() = mergeBB;
 
         std::vector<scope::Symbol*> symbols;
         std::vector<bibblir::PhiInstruction*> phis;
@@ -33,7 +35,8 @@ namespace bibblec::parser {
 
         mCondition->ccodegen(builder, module, diag, bodyBB, mergeBB);
 
-        bodyBB->loopEnd() = mergeBB;
+        bodyBB->loopEnd() = conditionBB;
+        conditionBB->loopEnd() = mergeBB;
 
         builder.setInsertPoint(bodyBB);
         for (auto* symbol : symbols) {
@@ -50,9 +53,14 @@ namespace bibblec::parser {
             symbol->values.emplace_back(bodyBB, phi);
         }
         mBody->codegen(builder, module, diag);
-        if (!builder.getInsertPoint()->hasTerminator()) mCondition->ccodegen(builder, module, diag, bodyBB, mergeBB);
+        if (!builder.getInsertPoint()->hasTerminator()) builder.createBr(conditionBB);
 
         builder.getInsertPoint()->loopEnd() = mergeBB;
+
+        if (builder.getInsertPoint()->successors().back() == conditionBB) {
+            builder.setInsertPoint(conditionBB);
+            mCondition->ccodegen(builder, module, diag, bodyBB, mergeBB);
+        }
 
         for (size_t i = 0; i < phis.size(); i++) {
             if (!phis[i]) continue;
