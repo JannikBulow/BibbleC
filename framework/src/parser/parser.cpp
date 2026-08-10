@@ -208,8 +208,14 @@ namespace bibblec::parser {
         }
 
         switch (current().getTokenType()) {
+            case lexer::TokenType::BreakKeyword:
+                return parseBreakStatement();
+
             case lexer::TokenType::LeftBrace:
                 return parseCompoundStatement();
+
+            case lexer::TokenType::ContinueKeyword:
+                return parseContinueStatement();
 
             case lexer::TokenType::ForKeyword:
                 return parseForStatement();
@@ -461,6 +467,19 @@ namespace bibblec::parser {
         );
     }
 
+    BreakStatementPtr Parser::parseBreakStatement() {
+        SourcePair source(current().getStartLocation(), current().getEndLocation());
+        consume();
+
+        std::string label;
+        if (current().getTokenType() == lexer::TokenType::Identifier) {
+            label = consume().getText();
+            source.end = peek(-1).getEndLocation();
+        }
+
+        return std::make_unique<BreakStatement>(std::move(label), mActiveScope, source);
+    }
+
     CompoundStatementPtr Parser::parseCompoundStatement() {
         SourcePair source;
         source.start = consume().getStartLocation();
@@ -481,6 +500,19 @@ namespace bibblec::parser {
         mActiveScope = scope->getParent();
 
         return std::make_unique<CompoundStatement>(std::move(body), std::move(scope), source);
+    }
+
+    ContinueStatementPtr Parser::parseContinueStatement() {
+        SourcePair source(current().getStartLocation(), current().getEndLocation());
+        consume();
+
+        std::string label;
+        if (current().getTokenType() == lexer::TokenType::Identifier) {
+            label = consume().getText();
+            source.end = peek(-1).getEndLocation();
+        }
+
+        return std::make_unique<ContinueStatement>(std::move(label), mActiveScope, source);
     }
 
     ForStatementPtr Parser::parseForStatement() {

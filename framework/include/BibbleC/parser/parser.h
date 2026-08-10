@@ -20,7 +20,9 @@
 #include "BibbleC/parser/ast/global/class_declaration.h"
 #include "BibbleC/parser/ast/global/function.h"
 
+#include "BibbleC/parser/ast/statement/break_statement.h"
 #include "BibbleC/parser/ast/statement/compound_statement.h"
+#include "BibbleC/parser/ast/statement/continue_statement.h"
 #include "BibbleC/parser/ast/statement/for_statement.h"
 #include "BibbleC/parser/ast/statement/if_statement.h"
 #include "BibbleC/parser/ast/statement/return_statement.h"
@@ -69,7 +71,9 @@ namespace bibblec::parser {
         ClassDeclarationPtr parseClassDeclaration();
         FunctionPtr parseFunction(lexer::SourceLocation sourceStart, Type* returnType, Type* implType);
 
+        BreakStatementPtr parseBreakStatement();
         CompoundStatementPtr parseCompoundStatement();
+        ContinueStatementPtr parseContinueStatement();
         ForStatementPtr parseForStatement();
         IfStatementPtr parseIfStatement();
         ReturnStatementPtr parseReturnStatement();
