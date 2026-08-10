@@ -35,7 +35,7 @@ namespace bibblec::parser {
 
         mCondition->ccodegen(builder, module, diag, bodyBB, mergeBB);
 
-        bodyBB->loopEnd() = conditionBB;
+        bodyBB->loopEnd() = mergeBB;
         conditionBB->loopEnd() = mergeBB;
 
         builder.setInsertPoint(bodyBB);
