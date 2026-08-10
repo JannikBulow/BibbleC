@@ -31,7 +31,9 @@ set(SOURCES
     src/parser/ast/global/class_declaration.cpp
     src/parser/ast/global/function.cpp
 
+    src/parser/ast/statement/break_statement.cpp
     src/parser/ast/statement/compound_statement.cpp
+    src/parser/ast/statement/continue_statement.cpp
     src/parser/ast/statement/for_statement.cpp
     src/parser/ast/statement/if_statement.cpp
     src/parser/ast/statement/return_statement.cpp
@@ -73,7 +75,9 @@ set(HEADERS
     include/BibbleC/parser/ast/global/class_declaration.h
     include/BibbleC/parser/ast/global/function.h
 
+    include/BibbleC/parser/ast/statement/break_statement.h
     include/BibbleC/parser/ast/statement/compound_statement.h
+    include/BibbleC/parser/ast/statement/continue_statement.h
     include/BibbleC/parser/ast/statement/for_statement.h
     include/BibbleC/parser/ast/statement/if_statement.h
     include/BibbleC/parser/ast/statement/return_statement.h
