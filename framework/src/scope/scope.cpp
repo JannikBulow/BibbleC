@@ -83,4 +83,22 @@ namespace bibblec::scope {
     std::string& Scope::label() {
         return mLabel;
     }
+
+    bibblir::BasicBlock* Scope::getContinueBB(std::string_view label) const {
+        for (const Scope& scope : *this) {
+            if (scope.mContinueBB) {
+                if (label.empty() || scope.mLabel == label) return scope.mContinueBB;
+            }
+        }
+        return nullptr;
+    }
+
+    bibblir::BasicBlock* Scope::getBreakBB(std::string_view label) const {
+        for (const Scope& scope : *this) {
+            if (scope.mBreakBB) {
+                if (label.empty() || scope.mLabel == label) return scope.mBreakBB;
+            }
+        }
+        return nullptr;
+    }
 }

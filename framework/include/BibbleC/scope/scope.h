@@ -56,6 +56,9 @@ namespace bibblec::scope {
         bibblir::BasicBlock*& breakBB();
         std::string& label();
 
+        bibblir::BasicBlock* getContinueBB(std::string_view label) const;
+        bibblir::BasicBlock* getBreakBB(std::string_view label) const;
+
     private:
         Scope* mParent;
         std::optional<std::string> mModuleName;
