@@ -12,7 +12,7 @@
 
 namespace bibblec::parser {
     BinaryExpression::BinaryExpression(scope::Scope* scope, ASTNodePtr left, lexer::Token operatorToken, ASTNodePtr right, SourcePair source)
-        : ASTNode(scope, std::move(source))
+        : ASTNode(scope, source)
         , mLeft(std::move(left))
         , mRight(std::move(right))
         , mOperatorToken(std::move(operatorToken)) {
@@ -31,6 +31,15 @@ namespace bibblec::parser {
                 break;
             case lexer::TokenType::Percent:
                 mOperator = Mod;
+                break;
+            case lexer::TokenType::Ampersand:
+                mOperator = BitwiseAnd;
+                break;
+            case lexer::TokenType::Pipe:
+                mOperator = BitwiseOr;
+                break;
+            case lexer::TokenType::Caret:
+                mOperator = BitwiseXor;
                 break;
             case lexer::TokenType::DoubleEqual:
                 mOperator = Equal;
@@ -138,6 +147,13 @@ namespace bibblec::parser {
 
                 diag.reportCompilerError(mSource, "can't divide a non-integer type"); // this probably shouldn't say divide, but idk what the verb for modulo is
                 std::exit(1);
+
+            case BitwiseAnd:
+                return builder.createAnd(left, right);
+            case BitwiseOr:
+                return builder.createOr(left, right);
+            case BitwiseXor:
+                return builder.createXor(left, right);
 
             case Equal:
                 return builder.createCmpEQ(left, right);
@@ -249,6 +265,9 @@ namespace bibblec::parser {
             case Mul:
             case Div:
             case Mod:
+            case BitwiseAnd:
+            case BitwiseOr:
+            case BitwiseXor:
                 if (mLeft->getType() != mRight->getType() && mLeft->getType()->isIntegerType() && mRight->getType()->isIntegerType()) {
                     if (mLeft->getType()->getSize() > mRight->getType()->getSize()) {
                         if (mRight->canImplicitCast(diag, mLeft->getType())) {

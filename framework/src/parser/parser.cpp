@@ -74,6 +74,13 @@ namespace bibblec::parser {
             case lexer::TokenType::BangEqual:
                 return 50;
 
+            case lexer::TokenType::Ampersand:
+                return 45;
+            case lexer::TokenType::Pipe:
+                return 40;
+            case lexer::TokenType::Caret:
+                return 35;
+
             case lexer::TokenType::DoubleAmpersand:
                 return 30;
             case lexer::TokenType::DoublePipe:

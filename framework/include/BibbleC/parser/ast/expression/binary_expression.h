@@ -17,6 +17,10 @@ namespace bibblec::parser {
             Div,
             Mod,
 
+            BitwiseAnd,
+            BitwiseOr,
+            BitwiseXor,
+
             Equal,
             NotEqual,
             LessThan,
