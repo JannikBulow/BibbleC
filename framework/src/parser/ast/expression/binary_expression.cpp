@@ -83,6 +83,15 @@ namespace bibblec::parser {
             case lexer::TokenType::PercentEqual:
                 mOperator = ModAssign;
                 break;
+            case lexer::TokenType::AmpersandEqual:
+                mOperator = BitwiseAndAssign;
+                break;
+            case lexer::TokenType::PipeEqual:
+                mOperator = BitwiseOrAssign;
+                break;
+            case lexer::TokenType::CaretEqual:
+                mOperator = BitwiseXorAssign;
+                break;
 
             default:
                 break; // maybe add an unreachable() thing here
@@ -203,6 +212,18 @@ namespace bibblec::parser {
                     }
                 }
                 return createAssign(left, mod, false);
+            }
+            case BitwiseAndAssign: {
+                auto _and = builder.createAnd(left, right);
+                return createAssign(left, _and, false);
+            }
+            case BitwiseOrAssign: {
+                auto _or = builder.createOr(left, right);
+                return createAssign(left, _or, false);
+            }
+            case BitwiseXorAssign: {
+                auto _xor = builder.createXor(left, right);
+                return createAssign(left, _xor, false);
             }
         }
 
@@ -368,6 +389,9 @@ namespace bibblec::parser {
             case MulAssign:
             case DivAssign:
             case ModAssign:
+            case BitwiseAndAssign:
+            case BitwiseOrAssign:
+            case BitwiseXorAssign:
                 if (mLeft->getType()->isIntegerType()) {
                     if (mLeft->getType() != mRight->getType()) {
                         if (mRight->canImplicitCast(diag, mLeft->getType())) {

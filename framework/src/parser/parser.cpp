@@ -92,6 +92,9 @@ namespace bibblec::parser {
             case lexer::TokenType::StarEqual:
             case lexer::TokenType::SlashEqual:
             case lexer::TokenType::PercentEqual:
+            case lexer::TokenType::AmpersandEqual:
+            case lexer::TokenType::PipeEqual:
+            case lexer::TokenType::CaretEqual:
                 return 20;
 
             default:

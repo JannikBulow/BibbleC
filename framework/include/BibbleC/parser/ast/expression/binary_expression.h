@@ -37,6 +37,9 @@ namespace bibblec::parser {
             MulAssign,
             DivAssign,
             ModAssign,
+            BitwiseAndAssign,
+            BitwiseOrAssign,
+            BitwiseXorAssign,
         };
 
         BinaryExpression(scope::Scope* scope, ASTNodePtr left, lexer::Token operatorToken, ASTNodePtr right, SourcePair source);
