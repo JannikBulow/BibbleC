@@ -33,6 +33,7 @@ namespace bibblec::parser {
     };
 
     class BIBBLEC_EXPORT Function : public ASTNode {
+        friend class ClassDeclaration;
         friend struct ClassMethod;
     public:
         Function(

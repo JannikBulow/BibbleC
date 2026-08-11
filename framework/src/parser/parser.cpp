@@ -327,7 +327,7 @@ namespace bibblec::parser {
                 expectToken(lexer::TokenType::Identifier);
                 name = consume().getText();
                 methodKind = ClassMethod::Normal;
-                methodDispatch = ClassMethod::NonVirtual; // TODO: figure out the virtual situation
+                methodDispatch = ClassMethod::Virtual; // TODO: figure out the virtual situation
             }
 
             if (current().getTokenType() != lexer::TokenType::LeftParen) {

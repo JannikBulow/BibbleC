@@ -27,11 +27,15 @@ namespace bibblec::parser {
             Virtual
         };
 
+        FunctionType* type;
+        std::string name;
         FunctionPtr impl;
         Kind kind;
         Dispatch dispatch;
 
         ClassMethod(FunctionPtr impl, Kind kind = Normal, Dispatch dispatch = NonVirtual);
+
+        bool isVirtual() const;
     };
 
     class BIBBLEC_EXPORT ClassDeclaration : public ASTNode {

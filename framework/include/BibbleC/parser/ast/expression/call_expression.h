@@ -21,6 +21,7 @@ namespace bibblec::parser {
         std::vector<ASTNodePtr> mParameters;
 
         bool mIsMemberFunction;
+        bool mIsVirtualMethod;
         scope::Symbol* mBestViableFunction;
 
         scope::Symbol* getBestViableFunction(diagnostic::Diagnostics& diag);

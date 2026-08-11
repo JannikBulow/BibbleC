@@ -16,7 +16,7 @@ namespace bibblec::parser {
 
     Function::Function(
         std::vector<lexer::Token> modifierTokens,
-            Type* implType,
+        Type* implType,
         std::string name,
         FunctionType* type,
         std::vector<FunctionArgument> arguments,
@@ -37,7 +37,7 @@ namespace bibblec::parser {
 
     Function::Function(
         FunctionModifiers modifiers,
-            Type* implType,
+        Type* implType,
         std::string name,
         FunctionType* type,
         std::vector<FunctionArgument> arguments,
@@ -77,7 +77,7 @@ namespace bibblec::parser {
     bibblir::Value* Function::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         auto function = static_cast<bibblir::Function*>(mSymbol->values.front().value);
 
-        bibblir::BasicBlock* entryBB = function->createBasicBlock("");
+        bibblir::BasicBlock* entryBB = function->createBasicBlock("." + function->identifier());
         builder.setInsertPoint(entryBB);
 
         int index = 0;

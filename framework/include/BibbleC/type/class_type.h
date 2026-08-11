@@ -3,6 +3,8 @@
 #ifndef BIBBLEC_TYPE_CLASS_TYPE_H
 #define BIBBLEC_TYPE_CLASS_TYPE_H
 
+#include "BibbleC/scope/symbol.h"
+
 #include "BibbleC/type/type.h"
 
 #include <BibblIR/ir/class.h>
@@ -10,9 +12,12 @@
 namespace bibblec {
     class BIBBLEC_EXPORT ClassType : public Type {
     public:
-        struct Field {
+        struct Member {
             Type* type;
             std::string name;
+            bool isMethod;
+
+            scope::Symbol* methodImpl; // this is ass
         };
 
         ClassType(std::string moduleName, std::string name);
@@ -20,14 +25,16 @@ namespace bibblec {
         std::string_view getModuleName() const;
         std::string_view getClassName() const;
 
-        const std::vector<Field>& getFields() const;
-        bool hasField(std::string_view fieldName);
-        Field* getField(std::string_view fieldName);
+        const std::vector<Member>& getMembers() const;
+        bool hasMember(std::string_view fieldName);
+        Member* getMember(std::string_view fieldName);
+
         bibblir::Field* getBibblirField(std::string_view fieldName);
+        bibblir::Method* getBibblirMethod(std::string_view methodName);
 
         bibblir::Class* getBibblirClass() const;
 
-        void setFields(std::vector<Field> fields);
+        void setFields(std::vector<Member> fields);
         void setBibblirClass(bibblir::Class* clas);
 
         int getSize() const override;
@@ -48,7 +55,7 @@ namespace bibblec {
         std::string mModuleName;
         std::string mClassName;
 
-        std::optional<std::vector<Field>> mFields;
+        std::optional<std::vector<Member>> mFields;
         bibblir::Class* mBibblirClass; // to get field nodes
     };
 }

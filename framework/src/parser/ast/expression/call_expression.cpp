@@ -17,6 +17,7 @@ namespace bibblec::parser {
         , mCallee(std::move(callee))
         , mParameters(std::move(parameters))
         , mIsMemberFunction(false)
+        , mIsVirtualMethod(false)
         , mBestViableFunction(nullptr) {}
 
     std::vector<ASTNode*> CallExpression::getChildren() {
@@ -30,7 +31,7 @@ namespace bibblec::parser {
     }
 
     bibblir::Value* CallExpression::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
-        bibblir::Value* callee = mBestViableFunction->getLatestValue()->value;
+        bibblir::Value* callee = mIsVirtualMethod ? mCallee->codegen(builder, module, diag) : mBestViableFunction->getLatestValue()->value;
 
         std::vector<bibblir::Value*> parameters;
         parameters.reserve(mParameters.size() + (mIsMemberFunction ? 1 : 0));
@@ -54,6 +55,10 @@ namespace bibblec::parser {
 
         mBestViableFunction = getBestViableFunction(diag);
         if (!mBestViableFunction) {
+            if (mIsVirtualMethod) {
+                mType = mCallee->getType();
+                return;
+            }
             exit = true;
             mType = Type::Get("error-type");
             return;
@@ -97,6 +102,10 @@ namespace bibblec::parser {
                 errorName = var->getName();
             } else if (auto memberAccess = dynamic_cast<MemberAccess*>(mCallee.get())) {
                 mIsMemberFunction = true;
+                if (memberAccess->mIsMethod) {
+                    mIsVirtualMethod = true;
+                    return nullptr;
+                }
                 candidates = mScope->getCandidateFunctions(memberAccess->mId);
                 errorName = std::format("{}::{}", memberAccess->mClassType->getName(), memberAccess->mId);
                 thisParameter = 1;

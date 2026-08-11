@@ -8,7 +8,9 @@
 
 namespace bibblec::parser {
     ClassMethod::ClassMethod(FunctionPtr impl, Kind kind, Dispatch dispatch)
-        : impl(std::move(impl))
+        : type(static_cast<FunctionType*>(impl->getType()))
+        , name(impl->getName())
+        , impl(std::move(impl))
         , kind(kind)
         , dispatch(dispatch) {
         switch (kind) {
@@ -25,6 +27,10 @@ namespace bibblec::parser {
                 this->impl->mSymbol->name = ".finalize";
                 break;
         }
+    }
+
+    bool ClassMethod::isVirtual() const {
+        return dispatch == Virtual;
     }
 
     ClassDeclaration::ClassDeclaration(scope::Scope* scope, std::string name, std::vector<ClassField> fields, std::vector<ClassMethod> methods, SourcePair source)
@@ -45,12 +51,15 @@ namespace bibblec::parser {
         // yeah this is prob fine
         ClassType* classType = static_cast<ClassType*>(mType);
 
-        std::vector<ClassType::Field> classTypeFields;
-        classTypeFields.reserve(mFields.size());
+        std::vector<ClassType::Member> classTypeMembers;
+        classTypeMembers.reserve(mFields.size() + mMethods.size());
         for (auto& field : mFields) {
-            classTypeFields.emplace_back(field.type, field.name);
+            classTypeMembers.emplace_back(field.type, field.name, false);
         }
-        classType->setFields(classTypeFields);
+        for (auto& method : mMethods) {
+            if (method.isVirtual()) classTypeMembers.emplace_back(method.type, method.name, true, method.impl ? method.impl->mSymbol : nullptr);
+        }
+        classType->setFields(classTypeMembers);
     }
 
     std::vector<ASTNode*> ClassDeclaration::getChildren() {
@@ -94,7 +103,7 @@ namespace bibblec::parser {
 
     void ClassDeclaration::setEmittedValue(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         for (auto& method : mMethods) {
-            method.impl->setEmittedValue(builder, module, diag);
+            if (method.impl) method.impl->setEmittedValue(builder, module, diag);
         }
     }
 

@@ -24,6 +24,8 @@ namespace bibblec::parser {
         std::string mId;
 
         ClassType* mClassType;
+
+        bool mIsMethod = false;
     };
 
     using MemberAccessPtr = std::unique_ptr<MemberAccess>;

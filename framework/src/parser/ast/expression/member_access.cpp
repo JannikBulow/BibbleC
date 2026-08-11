@@ -23,7 +23,7 @@ namespace bibblec::parser {
     bibblir::Value* MemberAccess::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         bibblir::Value* object = mObject->codegen(builder, module, diag);
 
-        bibblir::Value* getmember = builder.createGetMember(object, mClassType->getBibblirField(mId));
+        bibblir::Value* getmember = builder.createGetMember(object, mIsMethod ? static_cast<bibblir::Value*>(mClassType->getBibblirMethod(mId)) : mClassType->getBibblirField(mId));
         return builder.createLoad(getmember);
     }
 
@@ -41,9 +41,14 @@ namespace bibblec::parser {
         }
         mClassType = static_cast<ClassType*>(mObject->getType());
 
-        ClassType::Field* field = mClassType->getField(mId);
-        if (field) {
-            mType = field->type;
+        ClassType::Member* member = mClassType->getMember(mId);
+        if (member) {
+            mType = member->type;
+            mIsMethod = member->isMethod;
+
+            if (mIsMethod) {
+                mType = static_cast<FunctionType*>(mType)->getReturnType();
+            }
         } else {
             auto functions = mScope->getCandidateFunctions(mId);
             if (!functions.empty()) {

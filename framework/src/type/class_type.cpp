@@ -20,20 +20,20 @@ namespace bibblec {
         return mClassName;
     }
 
-    const std::vector<ClassType::Field>& ClassType::getFields() const {
+    const std::vector<ClassType::Member>& ClassType::getMembers() const {
         assert(mFields.has_value());
         return mFields.value();
     }
 
-    bool ClassType::hasField(std::string_view fieldName) {
+    bool ClassType::hasMember(std::string_view fieldName) {
         assert(mFields.has_value());
-        return getField(fieldName) != nullptr;
+        return getMember(fieldName) != nullptr;
     }
 
-    ClassType::Field* ClassType::getField(std::string_view fieldName) {
+    ClassType::Member* ClassType::getMember(std::string_view fieldName) {
         assert(mFields.has_value());
 
-        auto it = std::ranges::find_if(*mFields, [&fieldName](const Field& field) {
+        auto it = std::ranges::find_if(*mFields, [&fieldName](const Member& field) {
             return field.name == fieldName;
         });
         if (it == mFields->end()) return nullptr;
@@ -42,17 +42,24 @@ namespace bibblec {
     }
 
     bibblir::Field* ClassType::getBibblirField(std::string_view fieldName) {
-        Field* field = getField(fieldName);
-        if (field == nullptr) return nullptr;
+        Member* field = getMember(fieldName);
+        if (field == nullptr || field->isMethod) return nullptr;
 
         return mBibblirClass->addField(field->type->getBibblirType(), field->name);
+    }
+
+    bibblir::Method* ClassType::getBibblirMethod(std::string_view methodName) {
+        Member* method = getMember(methodName);
+        if (method == nullptr || !method->isMethod) return nullptr;
+
+        return mBibblirClass->addMethod(static_cast<bibblir::FunctionType*>(method->type->getBibblirType()), method->name, method->methodImpl ? method->methodImpl->getLatestValue()->value : nullptr);
     }
 
     bibblir::Class* ClassType::getBibblirClass() const {
         return mBibblirClass;
     }
 
-    void ClassType::setFields(std::vector<Field> fields) {
+    void ClassType::setFields(std::vector<Member> fields) {
         assert(!mFields.has_value());
         mFields = std::move(fields);
     }
