@@ -4,7 +4,7 @@
 
 #include "BibbleC/type/function_type.h"
 
-#include <BibblIR/ir/instruction/field_instruction.h>
+#include <BibblIR/ir/instruction/getmember_instruction.h>
 #include <BibblIR/ir/instruction/load_instruction.h>
 
 #include <BibblIR/ir/instruction.h>
@@ -23,8 +23,8 @@ namespace bibblec::parser {
     bibblir::Value* MemberAccess::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         bibblir::Value* object = mObject->codegen(builder, module, diag);
 
-        bibblir::Value* getfield = builder.createGetField(object, mClassType->getBibblirField(mId));
-        return builder.createLoad(getfield);
+        bibblir::Value* getmember = builder.createGetMember(object, mClassType->getBibblirField(mId));
+        return builder.createLoad(getmember);
     }
 
     void MemberAccess::typeCheck(diagnostic::Diagnostics& diag, bool& exit) {
