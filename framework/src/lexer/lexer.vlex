@@ -36,6 +36,9 @@ tokens bibblec {
     *=
     /=
     %=
+    &=
+    |=
+    ^=
 
     _identifier
     _integer_literal
