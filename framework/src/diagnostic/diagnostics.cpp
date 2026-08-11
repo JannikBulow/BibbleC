@@ -56,6 +56,8 @@ namespace bibblec::diagnostic {
         mErrorStream << std::format("{}{}:{}:{} {}error: {}{}\n", fmt::bold, start.file, start.line, start.col, fmt::red, fmt::reset, message);
         mErrorStream << std::format("    {} | {}{}{}{}{}{}\n", start.line, before, fmt::bold, fmt::red, error, fmt::reset, after);
         mErrorStream << std::format("    {} | {}{}{}^{}{}\n", spacesBefore, spacesAfter, fmt::bold, fmt::red, std::string(error.length() - 1, '~'), fmt::reset);
+
+        mErrorCount++;
     }
 
     void Diagnostics::reportCompilerWarning(lexer::SourceLocation start, lexer::SourceLocation end, std::string_view warning, std::string_view message) {

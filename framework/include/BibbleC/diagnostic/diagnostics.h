@@ -49,6 +49,8 @@ namespace bibblec {
             std::ostream& mErrorStream;
             std::ostream& mWarningStream;
 
+            int mErrorCount = 0;
+
             std::unordered_map<std::string, std::string_view, StringHash, StringEqual> mTexts;
             std::vector<std::string_view> mWarnings;
 
