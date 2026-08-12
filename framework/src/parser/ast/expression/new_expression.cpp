@@ -27,9 +27,9 @@ namespace bibblec::parser {
     }
 
     bibblir::Value* NewExpression::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
-        bibblir::Value* constructor = mBestViableConstructor->getLatestValue()->value;
-
         if (mType->isClassType()) {
+            bibblir::Value* constructor = mBestViableConstructor->getLatestValue()->value;
+
             bibblir::Value* object = builder.createNew(static_cast<bibblir::ClassType*>(mType->getBibblirType()));
 
             std::vector<bibblir::Value*> parameters;
@@ -42,6 +42,9 @@ namespace bibblec::parser {
             builder.createCall(constructor, std::move(parameters));
 
             return object;
+        } else if (mType->isArrayType()) {
+            //TODO: multidimensional array
+            return builder.createNew(static_cast<bibblir::ArrayType*>(mType->getBibblirType()), mParameters.front()->codegen(builder, module, diag));
         }
 
         return nullptr;
@@ -52,35 +55,39 @@ namespace bibblec::parser {
             parameter->typeCheck(diag, exit);
         }
 
-        if (!mType->isClassType()) {
-            diag.reportCompilerError(mSource,
-                std::format("'{}operator new{}' can currently only be used on {}class{} types",
-                    fmt::bold, fmt::reset, fmt::bold, fmt::reset)
-            );
-            exit = true;
-            return;
-        }
+        if (mType->isClassType()) {
+            mBestViableConstructor = getBestViableConstructor(diag);
+            if (!mBestViableConstructor) {
+                exit = true;
+                return;
+            }
 
-        mBestViableConstructor = getBestViableConstructor(diag);
-        if (!mBestViableConstructor) {
-            exit = true;
-            return;
-        }
+            auto functionType = static_cast<FunctionType*>(mBestViableConstructor->type);
 
-        auto functionType = static_cast<FunctionType*>(mBestViableConstructor->type);
+            unsigned int index = 1;
+            for (auto& parameter : mParameters) {
+                Type* argumentType = functionType->getArgumentTypes()[index++];
 
-        unsigned int index = 1;
-        for (auto& parameter : mParameters) {
-            Type* argumentType = functionType->getArgumentTypes()[index++];
+                if (parameter->getType() != argumentType) {
+                    if (parameter->canImplicitCast(diag, argumentType)) {
+                        parameter = CastTo(parameter, argumentType);
+                    } else {
+                        diag.reportCompilerError(mSource,
+                            std::format("no matching constructor for class '{}{}{}'",
+                                fmt::bold, mType->getName(), fmt::reset)
+                        );
+                        exit = true;
+                    }
+                }
+            }
+        } else if (mType->isArrayType()) {
+            auto longType = Type::Get("long");
 
-            if (parameter->getType() != argumentType) {
-                if (parameter->canImplicitCast(diag, argumentType)) {
-                    parameter = CastTo(parameter, argumentType);
+            if (mParameters.front()->getType() != longType) {
+                if (mParameters.front()->canImplicitCast(diag, longType)) {
+                    mParameters.front() = CastTo(mParameters.front(), longType);
                 } else {
-                    diag.reportCompilerError(mSource,
-                        std::format("no matching constructor for class '{}{}{}'",
-                            fmt::bold, mType->getName(), fmt::reset)
-                    );
+                    diag.reportCompilerError(mSource, "array length is not an integer");
                     exit = true;
                 }
             }
