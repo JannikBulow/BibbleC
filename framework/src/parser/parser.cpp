@@ -2,6 +2,7 @@
 
 #include "BibbleC/parser/parser.h"
 
+#include "BibbleC/type/array_type.h"
 #include "BibbleC/type/class_type.h"
 
 namespace bibblec::parser {
@@ -111,7 +112,7 @@ namespace bibblec::parser {
         }
     }
 
-    Type* Parser::parseType() {
+    Type* Parser::parseType(bool parseArray) {
         auto recoverPosition = mPosition;
 
         Type* type;
@@ -130,6 +131,16 @@ namespace bibblec::parser {
                 type = Type::Get(consume().getText());
             } else {
                 type = nullptr;
+            }
+        }
+
+        if (parseArray) {
+            while (current().getTokenType() == lexer::TokenType::LeftBracket) {
+                consume();
+                expectToken(lexer::TokenType::RightBracket);
+                consume();
+
+                type = ArrayType::Get(type);
             }
         }
 
@@ -679,21 +690,31 @@ namespace bibblec::parser {
         SourcePair source;
         source.start = consume().getStartLocation();
 
-        Type* allocatedType = parseType();
-
-        expectToken(lexer::TokenType::LeftParen);
-        consume();
+        Type* allocatedType = parseType(false);
 
         std::vector<ASTNodePtr> parameters;
-        while (current().getTokenType() != lexer::TokenType::RightParen) {
-            parameters.push_back(parseExpression());
 
-            if (current().getTokenType() != lexer::TokenType::RightParen) {
-                expectToken(lexer::TokenType::Comma);
-                consume();
+        if (current().getTokenType() == lexer::TokenType::LeftBracket) {
+            allocatedType = ArrayType::Get(allocatedType);
+
+            consume();
+            parameters.push_back(parseExpression());
+            expectToken(lexer::TokenType::RightBracket);
+            source.end = consume().getEndLocation();
+        } else {
+            expectToken(lexer::TokenType::LeftParen);
+            consume();
+
+            while (current().getTokenType() != lexer::TokenType::RightParen) {
+                parameters.push_back(parseExpression());
+
+                if (current().getTokenType() != lexer::TokenType::RightParen) {
+                    expectToken(lexer::TokenType::Comma);
+                    consume();
+                }
             }
+            source.end = consume().getEndLocation();
         }
-        source.end = consume().getEndLocation();
 
         return std::make_unique<NewExpression>(mActiveScope, allocatedType, std::move(parameters), source);
     }

@@ -61,7 +61,7 @@ namespace bibblec::parser {
         int getBinaryOperatorPrecedence(lexer::TokenType tokenType);
         int getUnaryOperatorPrecedence(lexer::TokenType tokenType);
 
-        Type* parseType();
+        Type* parseType(bool parseArray = true);
 
         ASTNodePtr parseGlobal();
         ASTNodePtr parseExpression(int precedence = 1);
