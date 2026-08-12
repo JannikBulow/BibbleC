@@ -54,6 +54,7 @@ namespace bibblec::parser {
     int Parser::getBinaryOperatorPrecedence(lexer::TokenType tokenType) {
         switch (tokenType) {
             case lexer::TokenType::LeftParen:
+            case lexer::TokenType::LeftBracket:
             case lexer::TokenType::Dot:
                 return 100;
 
@@ -137,10 +138,12 @@ namespace bibblec::parser {
         if (parseArray) {
             while (current().getTokenType() == lexer::TokenType::LeftBracket) {
                 consume();
-                expectToken(lexer::TokenType::RightBracket);
-                consume();
-
-                type = ArrayType::Get(type);
+                if (current().getTokenType() == lexer::TokenType::RightBracket) {
+                    consume();
+                    type = ArrayType::Get(type);
+                } else {
+                    type = nullptr;
+                }
             }
         }
 
@@ -206,6 +209,8 @@ namespace bibblec::parser {
 
             if (operatorToken.getTokenType() == lexer::TokenType::LeftParen) {
                 left = parseCallExpression(std::move(left));
+            } else if (operatorToken.getTokenType() == lexer::TokenType::LeftBracket) {
+                left = parseIndexExpression(std::move(left), source, operatorToken);
             } else if (operatorToken.getTokenType() == lexer::TokenType::Dot) {
                 expectToken(lexer::TokenType::Identifier);
                 std::string id(consume().getText());
@@ -684,6 +689,13 @@ namespace bibblec::parser {
         source.end = consume().getEndLocation();
 
         return std::make_unique<CallExpression>(mActiveScope, std::move(callee), std::move(parameters), source);
+    }
+
+    BinaryExpressionPtr Parser::parseIndexExpression(ASTNodePtr left, SourcePair source, lexer::Token operatorToken) {
+        ASTNodePtr index = parseExpression();
+        expectToken(lexer::TokenType::RightBracket);
+        source.end = consume().getEndLocation();
+        return std::make_unique<BinaryExpression>(mActiveScope, std::move(left), std::move(operatorToken), std::move(index), source);
     }
 
     NewExpressionPtr Parser::parseNewExpression() {

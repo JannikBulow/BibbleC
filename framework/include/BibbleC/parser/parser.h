@@ -85,6 +85,7 @@ namespace bibblec::parser {
         BooleanLiteralPtr parseBooleanLiteral();
         VariableExpressionPtr parseVariableExpression();
         CallExpressionPtr parseCallExpression(ASTNodePtr callee);
+        BinaryExpressionPtr parseIndexExpression(ASTNodePtr left, SourcePair source, lexer::Token operatorToken);
         NewExpressionPtr parseNewExpression();
     };
 }

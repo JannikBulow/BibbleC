@@ -40,6 +40,8 @@ namespace bibblec::parser {
             BitwiseAndAssign,
             BitwiseOrAssign,
             BitwiseXorAssign,
+
+            Index
         };
 
         BinaryExpression(scope::Scope* scope, ASTNodePtr left, lexer::Token operatorToken, ASTNodePtr right, SourcePair source);

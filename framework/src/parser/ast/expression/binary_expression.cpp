@@ -3,12 +3,14 @@
 #include "BibbleC/parser/ast/expression/binary_expression.h"
 #include "BibbleC/parser/ast/expression/variable_expression.h"
 
+#include "BibbleC/type/array_type.h"
 #include "BibbleC/type/integer_type.h"
 
 #include <BibblIR/ir/instruction/binary_instruction.h>
+#include <BibblIR/ir/instruction/getelement_instruction.h>
 #include <BibblIR/ir/instruction/load_instruction.h>
 
-#include "BibblIR/ir/function.h"
+#include <BibblIR/ir/function.h>
 
 namespace bibblec::parser {
     BinaryExpression::BinaryExpression(scope::Scope* scope, ASTNodePtr left, lexer::Token operatorToken, ASTNodePtr right, SourcePair source)
@@ -91,6 +93,10 @@ namespace bibblec::parser {
                 break;
             case lexer::TokenType::CaretEqual:
                 mOperator = BitwiseXorAssign;
+                break;
+
+            case lexer::TokenType::LeftBracket:
+                mOperator = Index;
                 break;
 
             default:
@@ -224,6 +230,11 @@ namespace bibblec::parser {
             case BitwiseXorAssign: {
                 auto _xor = builder.createXor(left, right);
                 return createAssign(left, _xor, false);
+            }
+
+            case Index: {
+                bibblir::Value* getelement = builder.createGetElement(left, right);
+                return builder.createLoad(getelement);
             }
         }
 
@@ -416,6 +427,31 @@ namespace bibblec::parser {
                             );
                     exit = true;
                     mType = Type::Get("error-type");
+                }
+                break;
+
+            case Index:
+                if (!mLeft->getType()->isArrayType()) {
+                    diag.reportCompilerError(mSource,
+                        std::format("no match for '{}operator[]{}' with type '{}{}{}'",
+                            fmt::bold, fmt::reset, fmt::bold, mLeft->getType()->getName(), fmt::reset)
+                    );
+                    exit = true;
+                }
+                if (!mRight->getType()->isIntegerType()) {
+                    Type* longType = Type::Get("long");
+                    if (mRight->canImplicitCast(diag, longType)) {
+                        mRight = CastTo(mRight, longType);
+                    } else {
+                        diag.reportCompilerError(mSource,
+                            std::format("no match for '{}operator[]{}' with index type '{}{}{}'",
+                                fmt::bold, fmt::reset, fmt::bold, mRight->getType()->getName(), fmt::reset)
+                        );
+                        exit = true;
+                    }
+                }
+                if (mLeft->getType()->isArrayType()) {
+                    mType = static_cast<ArrayType*>(mLeft->getType())->getElementType();
                 }
                 break;
         }
