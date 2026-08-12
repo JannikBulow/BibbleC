@@ -14,6 +14,7 @@ class Test {
 
 int main() {
     int[] ints = new int[67];
+    ints[0] = 11;
     Test test = new Test(34, 35);
     return test.sum();
 }
