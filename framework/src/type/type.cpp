@@ -1,5 +1,6 @@
 // Copyright 2026 Jannik Laugmand Bülow
 
+#include "BibbleC/type/array_type.h"
 #include "BibbleC/type/auto_type.h"
 #include "BibbleC/type/boolean_type.h"
 #include "BibbleC/type/class_type.h"
@@ -60,6 +61,7 @@ namespace bibblec {
         types.clear();
         aliases.clear();
 
+        ArrayType::Reset();
         ClassType::Reset();
         FunctionType::Reset();
     }

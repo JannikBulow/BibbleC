@@ -47,6 +47,7 @@ set(SOURCES
     src/scope/scope.cpp
     src/scope/symbol.cpp
 
+    src/type/array_type.cpp
     src/type/auto_type.cpp
     src/type/boolean_type.cpp
     src/type/class_type.cpp
@@ -91,6 +92,7 @@ set(HEADERS
     include/BibbleC/scope/scope.h
     include/BibbleC/scope/symbol.h
 
+    include/BibbleC/type/array_type.h
     include/BibbleC/type/auto_type.h
     include/BibbleC/type/boolean_type.h
     include/BibbleC/type/class_type.h
