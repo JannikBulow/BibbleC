@@ -30,9 +30,7 @@ namespace bibblec::parser {
         bibblir::Value* constructor = mBestViableConstructor->getLatestValue()->value;
 
         if (mType->isClassType()) {
-            auto classType = static_cast<ClassType*>(mType);
-
-            bibblir::Value* object = builder.createNew(classType->getBibblirClass());
+            bibblir::Value* object = builder.createNew(static_cast<bibblir::ClassType*>(mType->getBibblirType()));
 
             std::vector<bibblir::Value*> parameters;
             parameters.reserve(mParameters.size() + 1);
