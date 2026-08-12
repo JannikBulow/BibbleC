@@ -13,6 +13,7 @@ class Test {
 }
 
 int main() {
+    int[] ints = new int[67];
     Test test = new Test(34, 35);
     return test.sum();
 }
