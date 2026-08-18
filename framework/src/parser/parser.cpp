@@ -158,18 +158,17 @@ namespace bibblec::parser {
             if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
                 return parseFunction(sourceStart, type, nullptr);
             } else {
-                mDiag.reportCompilerError(
-                    current().getStartLocation(),
-                    current().getEndLocation(),
-                    "expected parsable function (this error message is temporary and will be removed once proper global parsing is done)"
-                );
-                std::exit(1);
+                return parseGlobalVariable(sourceStart, type, false);
             }
         }
 
         switch (current().getTokenType()) {
             case lexer::TokenType::ClassKeyword:
                 return parseClassDeclaration();
+
+            case lexer::TokenType::ConstKeyword:
+                consume();
+                return parseGlobalVariable(sourceStart, parseType(), true);
 
             case lexer::TokenType::EndOfFile:
                 consume();
@@ -491,6 +490,27 @@ namespace bibblec::parser {
             source,
             blockEnd
         );
+    }
+
+    GlobalVariablePtr Parser::parseGlobalVariable(lexer::SourceLocation sourceStart, Type* type, bool constant) {
+        SourcePair source;
+        source.start = sourceStart;
+
+        expectToken(lexer::TokenType::Identifier);
+        std::string name(consume().getText());
+
+        ASTNodePtr initialValue = nullptr;
+        if (current().getTokenType() == lexer::TokenType::Equal) {
+            consume();
+            initialValue = parseExpression();
+        }
+
+        expectToken(lexer::TokenType::Semicolon);
+        consume();
+
+        source.end = peek(-1).getEndLocation();
+
+        return std::make_unique<GlobalVariable>(mActiveScope, std::move(name), type, std::move(initialValue), constant, source);
     }
 
     BreakStatementPtr Parser::parseBreakStatement() {

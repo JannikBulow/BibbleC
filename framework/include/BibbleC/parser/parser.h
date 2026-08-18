@@ -19,6 +19,7 @@
 
 #include "BibbleC/parser/ast/global/class_declaration.h"
 #include "BibbleC/parser/ast/global/function.h"
+#include "BibbleC/parser/ast/global/global_variable.h"
 
 #include "BibbleC/parser/ast/statement/break_statement.h"
 #include "BibbleC/parser/ast/statement/compound_statement.h"
@@ -70,6 +71,7 @@ namespace bibblec::parser {
 
         ClassDeclarationPtr parseClassDeclaration();
         FunctionPtr parseFunction(lexer::SourceLocation sourceStart, Type* returnType, Type* implType);
+        GlobalVariablePtr parseGlobalVariable(lexer::SourceLocation sourceStart, Type* type, bool constant);
 
         BreakStatementPtr parseBreakStatement();
         CompoundStatementPtr parseCompoundStatement();
