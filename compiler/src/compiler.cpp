@@ -11,6 +11,7 @@
 
 #include <BibblIR/pass/codegen/codegen.h>
 
+#include <BibblIR/pass/optimizer/constant_folding.h>
 #include <BibblIR/pass/optimizer/peephole.h>
 
 #include <BibblIR/pass/pass_manager.h>
@@ -105,6 +106,7 @@ namespace bibblec {
 
         bibblir::PassRegistry passRegistry = bibblir::PassRegistry::Default();
         bibblir::PassManager passManager(passRegistry);
+        passManager.addPass(passRegistry.create(bibblir::GetPassID<bibblir::ConstantFoldingPass>()));
         passManager.addPass(passRegistry.create(bibblir::GetPassID<bibblir::CodegenPass>()));
         passManager.addPass(passRegistry.create(bibblir::GetPassID<bibblir::PeepholePass>()));
 
