@@ -49,6 +49,10 @@ namespace bibblec {
         }
 
         for (FilePair& file : mFiles) {
+            doImports(mModules[file.input]);
+        }
+
+        for (FilePair& file : mFiles) {
             compileModule(mModules[file.input], file.output);
         }
     }
@@ -69,21 +73,97 @@ namespace bibblec {
     }
 
     void Compiler::parseModuleName(Module& module) {
-        module.name = module.path.filename().replace_extension("").string();
+        auto& tokens = module.tokens;
+
+        if (tokens[0].getTokenType() == lexer::TokenType::ModuleKeyword) {
+            if (tokens[1].getTokenType() == lexer::TokenType::Identifier) {
+                int pos = 1;
+                std::string moduleName;
+                while (tokens[pos].getTokenType() == lexer::TokenType::Identifier) {
+                    moduleName += tokens[pos++].getText();
+                    if (tokens[pos].getTokenType() == lexer::TokenType::Semicolon) break;
+
+                    if (tokens[pos].getTokenType() == lexer::TokenType::Dot) {
+                        pos++;
+                        moduleName += '.';
+                    }
+                }
+                mModuleFiles[moduleName].push_back(module.path);
+                module.name = std::move(moduleName);
+            } else {
+                mDiag.reportCompilerError(
+                    tokens[1].getStartLocation(),
+                    tokens[1].getEndLocation(),
+                    std::format("expected module name after '{}module{}' keyword", fmt::bold, fmt::reset));
+                std::exit(1);
+            }
+        } else {
+            mDiag.reportCompilerError(
+                    tokens[0].getStartLocation(),
+                    tokens[0].getEndLocation(),
+                    std::format("expected '{}module{}' keyword", fmt::bold, fmt::reset));
+            std::exit(1);
+        }
     }
 
     void Compiler::parse(Module& module) {
         module.globalScope = std::make_unique<scope::Scope>(module.name);
 
-        parser::Parser parser(module.tokens, mDiag, module.globalScope.get());
+        parser::Parser parser(module.tokens, mDiag, module.globalScope.get(), "");
 
         module.ast = parser.parse();
+    }
+
+    void Compiler::doImports(Module& module) {
+        auto& ast = module.ast;
+
+        std::vector<std::string> modules{module.name};
+        for (auto& node : ast) {
+            if (auto* import = dynamic_cast<parser::ImportStatement*>(node.get())) {
+                std::string moduleName;
+                for (auto& name : import->getModule()) {
+                    moduleName += name;
+                    moduleName += '.';
+                }
+                moduleName.pop_back();
+                modules.push_back(moduleName);
+
+                if (!mModuleFiles.contains(moduleName) && !mImportedModules.contains(moduleName)) {
+                    mDiag.reportCompilerError(import->getSource(),
+                        std::format("could not find module '{}{}{}'",
+                            fmt::bold, moduleName, fmt::reset));
+                    std::exit(1);
+                }
+            }
+        }
+
+        for (auto& moduleName : modules) {
+            for (auto& file : mModuleFiles[moduleName]) {
+                if (file != module.path) {
+                    auto& ast = mModules[file].ast;
+
+                    for (auto& node : ast) {
+                        if (auto cloned = node->cloneExternal(module.globalScope.get())) {
+                            module.ast.insert(module.ast.begin(), std::move(cloned));
+                        }
+                    }
+                }
+            }
+
+            if (mImportedModules.contains(moduleName)) {
+                for (auto& func : mImportedModules[moduleName]) {
+                    if (auto cloned = func->cloneExternal(module.globalScope.get())) {
+                        module.ast.insert(module.ast.begin(), std::move(cloned));
+                    }
+                }
+            }
+        }
     }
 
     void Compiler::compileModule(Module& module, std::filesystem::path outputFilePath) {
         module.module = bibblir::Module(module.name);
 
-        bibblir::IRBuilder builder;
+        bibblir::IRBuilder builder(module.module);
 
         bool exit = false;
         for (auto& node : module.ast) {

@@ -40,7 +40,7 @@ namespace bibblec::parser {
 
     class BIBBLEC_EXPORT ClassDeclaration : public ASTNode {
     public:
-        ClassDeclaration(scope::Scope* scope, std::string name, std::vector<ClassField> fields, std::vector<ClassMethod> methods, SourcePair source);
+        ClassDeclaration(scope::Scope* scope, std::string name, std::string externalModuleName, std::vector<ClassField> fields, std::vector<ClassMethod> methods, SourcePair source);
 
         std::vector<ASTNode*> getChildren() override;
 
@@ -53,6 +53,7 @@ namespace bibblec::parser {
 
     private:
         std::string mName;
+        std::string mExternalModuleName;
         std::vector<ClassField> mFields;
         std::vector<ClassMethod> mMethods;
 

@@ -20,6 +20,7 @@
 #include "BibbleC/parser/ast/global/class_declaration.h"
 #include "BibbleC/parser/ast/global/function.h"
 #include "BibbleC/parser/ast/global/global_variable.h"
+#include "BibbleC/parser/ast/global/import_statement.h"
 
 #include "BibbleC/parser/ast/statement/break_statement.h"
 #include "BibbleC/parser/ast/statement/compound_statement.h"
@@ -41,7 +42,7 @@
 namespace bibblec::parser {
     class BIBBLEC_EXPORT Parser {
     public:
-        Parser(std::vector<lexer::Token>& tokens, diagnostic::Diagnostics& diag, scope::Scope* globalScope);
+        Parser(std::vector<lexer::Token>& tokens, diagnostic::Diagnostics& diag, scope::Scope* globalScope, std::string importedModuleName);
 
         std::vector<ASTNodePtr> parse();
 
@@ -50,6 +51,8 @@ namespace bibblec::parser {
         size_t mPosition;
 
         diagnostic::Diagnostics& mDiag;
+
+        std::string mImportedModuleName;
 
         scope::Scope* mActiveScope;
 
@@ -72,6 +75,7 @@ namespace bibblec::parser {
         ClassDeclarationPtr parseClassDeclaration();
         FunctionPtr parseFunction(lexer::SourceLocation sourceStart, Type* returnType, Type* implType);
         GlobalVariablePtr parseGlobalVariable(lexer::SourceLocation sourceStart, Type* type, bool constant);
+        ImportStatementPtr parseImportStatement();
 
         BreakStatementPtr parseBreakStatement();
         CompoundStatementPtr parseCompoundStatement();

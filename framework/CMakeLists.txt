@@ -31,6 +31,7 @@ set(SOURCES
     src/parser/ast/global/class_declaration.cpp
     src/parser/ast/global/function.cpp
     src/parser/ast/global/global_variable.cpp
+    src/parser/ast/global/import_statement.cpp
 
     src/parser/ast/statement/break_statement.cpp
     src/parser/ast/statement/compound_statement.cpp
@@ -55,6 +56,7 @@ set(SOURCES
     src/type/error_type.cpp
     src/type/function_type.cpp
     src/type/integer_type.cpp
+    src/type/pending_type.cpp
     src/type/type.cpp
     src/type/void_type.cpp
 )
@@ -77,6 +79,7 @@ set(HEADERS
     include/BibbleC/parser/ast/global/class_declaration.h
     include/BibbleC/parser/ast/global/function.h
     include/BibbleC/parser/ast/global/global_variable.h
+    include/BibbleC/parser/ast/global/import_statement.h
 
     include/BibbleC/parser/ast/statement/break_statement.h
     include/BibbleC/parser/ast/statement/compound_statement.h
@@ -101,6 +104,7 @@ set(HEADERS
     include/BibbleC/type/error_type.h
     include/BibbleC/type/function_type.h
     include/BibbleC/type/integer_type.h
+    include/BibbleC/type/pending_type.h
     include/BibbleC/type/type.h
     include/BibbleC/type/void_type.h
 

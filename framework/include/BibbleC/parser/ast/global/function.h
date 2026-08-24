@@ -40,6 +40,7 @@ namespace bibblec::parser {
             std::vector<lexer::Token> modifierTokens,
             Type* implType,
             std::string name,
+            std::string externalModuleName,
             FunctionType* type,
             std::vector<FunctionArgument> arguments,
             scope::ScopePtr ownScope,
@@ -52,6 +53,7 @@ namespace bibblec::parser {
             FunctionModifiers modifiers,
             Type* implType,
             std::string name,
+            std::string externalModuleName,
             FunctionType* type,
             std::vector<FunctionArgument> arguments,
             scope::ScopePtr ownScope,
@@ -75,6 +77,7 @@ namespace bibblec::parser {
         FunctionModifiers mModifiers;
         Type* mImplType;
         std::string mName;
+        std::string mExternalModuleName;
         std::vector<FunctionArgument> mArguments;
         std::vector<ASTNodePtr> mBody;
         SourcePair mBlockEnd;

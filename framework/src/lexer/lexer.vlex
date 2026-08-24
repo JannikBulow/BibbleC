@@ -9,6 +9,7 @@ tokens bibblec {
     ,
     .
     ;
+    ::
 
     +
     -
@@ -46,6 +47,9 @@ tokens bibblec {
     _integer_literal
     _string_literal
     _character_literal
+
+    module
+    import
 
     class
     new

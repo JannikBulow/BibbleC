@@ -33,9 +33,10 @@ namespace bibblec::parser {
         return dispatch == Virtual;
     }
 
-    ClassDeclaration::ClassDeclaration(scope::Scope* scope, std::string name, std::vector<ClassField> fields, std::vector<ClassMethod> methods, SourcePair source)
+    ClassDeclaration::ClassDeclaration(scope::Scope* scope, std::string name, std::string externalModuleName, std::vector<ClassField> fields, std::vector<ClassMethod> methods, SourcePair source)
         : ASTNode(scope, source)
         , mName(std::move(name))
+        , mExternalModuleName(std::move(externalModuleName))
         , mFields(std::move(fields))
         , mMethods(std::move(methods))
         , mSymbol(nullptr) {
@@ -73,10 +74,10 @@ namespace bibblec::parser {
     ASTNodePtr ClassDeclaration::cloneExternal(scope::Scope* in) {
         std::vector<ClassMethod> methods;
         for (auto& method : mMethods) {
-            methods.emplace_back(FunctionPtr(static_cast<Function*>(method.impl->cloneExternal(in).release())));
+            methods.emplace_back(FunctionPtr(static_cast<Function*>(method.impl->cloneExternal(in).release())), method.kind, method.dispatch);
         }
 
-        return std::make_unique<ClassDeclaration>(in, mName, mFields, std::move(methods), mSource);
+        return std::make_unique<ClassDeclaration>(in, mName, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, mFields, std::move(methods), mSource);
     }
 
     bibblir::Value* ClassDeclaration::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {

@@ -4,8 +4,10 @@
 
 #include "BibbleC/parser/ast/statement/return_statement.h"
 
+#include <BibblIR/ir/external_function.h>
 #include <BibblIR/ir/function.h>
 
+#include <cassert>
 #include <functional>
 
 namespace bibblec::parser {
@@ -18,6 +20,7 @@ namespace bibblec::parser {
         std::vector<lexer::Token> modifierTokens,
         Type* implType,
         std::string name,
+        std::string externalModuleName,
         FunctionType* type,
         std::vector<FunctionArgument> arguments,
         scope::ScopePtr ownScope,
@@ -27,6 +30,7 @@ namespace bibblec::parser {
         : ASTNode(ownScope->getParent(), source, type)
         , mImplType(implType)
         , mName(std::move(name))
+        , mExternalModuleName(std::move(externalModuleName))
         , mArguments(std::move(arguments))
         , mBody(std::move(body))
         , mBlockEnd(blockEnd)
@@ -39,6 +43,7 @@ namespace bibblec::parser {
         FunctionModifiers modifiers,
         Type* implType,
         std::string name,
+        std::string externalModuleName,
         FunctionType* type,
         std::vector<FunctionArgument> arguments,
         scope::ScopePtr ownScope,
@@ -49,6 +54,7 @@ namespace bibblec::parser {
         , mModifiers(modifiers)
         , mImplType(implType)
         , mName(std::move(name))
+        , mExternalModuleName(std::move(externalModuleName))
         , mArguments(std::move(arguments))
         , mBody(std::move(body))
         , mBlockEnd(blockEnd)
@@ -71,11 +77,16 @@ namespace bibblec::parser {
     ASTNodePtr Function::cloneExternal(scope::Scope* in) {
         scope::ScopePtr ownScope = std::make_unique<scope::Scope>(std::nullopt, in);
         auto functionType = static_cast<FunctionType*>(mType);
-        return std::make_unique<Function>(mModifiers, mImplType, mName, functionType, mArguments, std::move(ownScope), std::vector<ASTNodePtr>(), mSource, mBlockEnd);
+        return std::make_unique<Function>(mModifiers, mImplType, mName, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, functionType, mArguments, std::move(ownScope), std::vector<ASTNodePtr>(), mSource, mBlockEnd);
     }
 
     bibblir::Value* Function::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         auto function = static_cast<bibblir::Function*>(mSymbol->values.front().value);
+
+        if (!mExternalModuleName.empty()) {
+            assert(mBody.empty());
+            return function;
+        }
 
         bibblir::BasicBlock* entryBB = function->createBasicBlock("." + function->identifier());
         builder.setInsertPoint(entryBB);
@@ -106,7 +117,12 @@ namespace bibblec::parser {
     void Function::setEmittedValue(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         std::string mangledName = mangleName();
 
-        bibblir::Function* function = bibblir::Function::Create(module, static_cast<bibblir::FunctionType*>(mType->getBibblirType()), std::move(mangledName));
+        bibblir::AbstractFunction* function;
+        if (!mExternalModuleName.empty()) {
+            function = bibblir::ExternalFunction::Create(module, static_cast<bibblir::FunctionType*>(mType->getBibblirType()), mExternalModuleName, std::move(mangledName));
+        } else {
+            function = bibblir::Function::Create(module, static_cast<bibblir::FunctionType*>(mType->getBibblirType()), std::move(mangledName));
+        }
 
         mSymbol->values.push_back({nullptr, function});
     }
@@ -164,7 +180,7 @@ namespace bibblec::parser {
     }
 
     void Function::constructorImpl(FunctionType* type) {
-        if (mImplType) {
+        if (mImplType && mExternalModuleName.empty()) {
             mArguments.insert(mArguments.begin(), {mImplType, "this"});
 
             auto argTypes = type->getArgumentTypes();

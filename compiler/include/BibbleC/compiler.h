@@ -28,6 +28,8 @@ namespace bibblec {
         diagnostic::Diagnostics& mDiag;
 
         std::unordered_map<std::filesystem::path, Module> mModules;
+        std::unordered_map<std::string, std::vector<std::filesystem::path>> mModuleFiles;
+        std::unordered_map<std::string, std::vector<parser::ASTNodePtr>> mImportedModules;
         std::vector<FilePair> mFiles;
 
         void compileModules();
@@ -35,6 +37,7 @@ namespace bibblec {
         void lex(Module& module);
         void parseModuleName(Module& module);
         void parse(Module& module);
+        void doImports(Module& module);
         void compileModule(Module& module, std::filesystem::path outputFilePath);
     };
 }
