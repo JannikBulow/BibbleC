@@ -21,22 +21,22 @@ namespace bibblec {
     }
 
     const std::vector<ClassType::Member>& ClassType::getMembers() const {
-        assert(mFields.has_value());
-        return mFields.value();
+        assert(mMembers.has_value());
+        return mMembers.value();
     }
 
     bool ClassType::hasMember(std::string_view fieldName) {
-        assert(mFields.has_value());
+        assert(mMembers.has_value());
         return getMember(fieldName) != nullptr;
     }
 
     ClassType::Member* ClassType::getMember(std::string_view fieldName) {
-        assert(mFields.has_value());
+        assert(mMembers.has_value());
 
-        auto it = std::ranges::find_if(*mFields, [&fieldName](const Member& field) {
+        auto it = std::ranges::find_if(*mMembers, [&fieldName](const Member& field) {
             return field.name == fieldName;
         });
-        if (it == mFields->end()) return nullptr;
+        if (it == mMembers->end()) return nullptr;
 
         return &*it;
     }
@@ -55,16 +55,16 @@ namespace bibblec {
         return mBibblirClass->addMethod(static_cast<bibblir::FunctionType*>(method->type->getBibblirType()), method->name, method->methodImpl ? method->methodImpl->getLatestValue()->value : nullptr);
     }
 
-    bibblir::Class* ClassType::getBibblirClass() const {
+    bibblir::AbstractClass* ClassType::getBibblirClass() const {
         return mBibblirClass;
     }
 
     void ClassType::setFields(std::vector<Member> fields) {
-        assert(!mFields.has_value());
-        mFields = std::move(fields);
+        //assert(!mFields.has_value());
+        mMembers = std::move(fields);
     }
 
-    void ClassType::setBibblirClass(bibblir::Class* clas) {
+    void ClassType::setBibblirClass(bibblir::AbstractClass* clas) {
         mBibblirClass = clas;
     }
 

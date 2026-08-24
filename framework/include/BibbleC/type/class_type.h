@@ -7,7 +7,7 @@
 
 #include "BibbleC/type/type.h"
 
-#include <BibblIR/ir/class.h>
+#include <BibblIR/ir/abstract_class.h>
 
 namespace bibblec {
     class BIBBLEC_EXPORT ClassType : public Type {
@@ -32,10 +32,10 @@ namespace bibblec {
         bibblir::Field* getBibblirField(std::string_view fieldName);
         bibblir::Method* getBibblirMethod(std::string_view methodName);
 
-        bibblir::Class* getBibblirClass() const;
+        bibblir::AbstractClass* getBibblirClass() const;
 
         void setFields(std::vector<Member> fields);
-        void setBibblirClass(bibblir::Class* clas);
+        void setBibblirClass(bibblir::AbstractClass* clas);
 
         int getSize() const override;
 
@@ -55,8 +55,8 @@ namespace bibblec {
         std::string mModuleName;
         std::string mClassName;
 
-        std::optional<std::vector<Member>> mFields;
-        bibblir::Class* mBibblirClass; // to get field nodes
+        std::optional<std::vector<Member>> mMembers;
+        bibblir::AbstractClass* mBibblirClass; // to get field nodes
     };
 }
 
