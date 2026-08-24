@@ -5,6 +5,7 @@
 #include "BibbleC/type/class_type.h"
 
 #include <BibblIR/ir/class.h>
+#include <BibblIR/ir/external_class.h>
 
 namespace bibblec::parser {
     ClassMethod::ClassMethod(FunctionPtr impl, Kind kind, Dispatch dispatch)
@@ -46,7 +47,7 @@ namespace bibblec::parser {
         if (Type* type = Type::Get(mName)) {
             mType = type;
         } else {
-            mType = ClassType::Create(std::string(mScope->getModuleName()), mName);
+            mType = ClassType::Create(mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, mName);
         }
 
         // yeah this is prob fine
@@ -81,7 +82,12 @@ namespace bibblec::parser {
     }
 
     bibblir::Value* ClassDeclaration::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
-        bibblir::Class* clas = bibblir::Class::Create(module, mName);
+        bibblir::AbstractClass* clas;
+        if (!mExternalModuleName.empty()) {
+            clas = bibblir::ExternalClass::Create(module, mExternalModuleName, mName);
+        } else {
+            clas = bibblir::Class::Create(module, mName);
+        }
         static_cast<ClassType*>(mType)->setBibblirClass(clas);
 
         for (auto& field : mFields) {
