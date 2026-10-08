@@ -42,5 +42,24 @@ target_compile_features(BibbleC-compiler-static PUBLIC cxx_std_20)
 target_link_libraries(BibbleC-compiler-shared BibbleC-framework-shared)
 target_link_libraries(BibbleC-compiler-static BibbleC-framework-static)
 
-set_target_properties(BibbleC-compiler-shared PROPERTIES OUTPUT_NAME "bibblec")
-set_target_properties(BibbleC-compiler-static PROPERTIES OUTPUT_NAME "bibblec-aio")
+set_target_properties(BibbleC-compiler-shared PROPERTIES
+    OUTPUT_NAME "bibblec"
+    VERSION 0.1.0
+    SOVERSION 0
+)
+set_target_properties(BibbleC-compiler-static PROPERTIES
+    OUTPUT_NAME "bibblec-aio"
+    VERSION 0.1.0
+)
+
+install(
+    TARGETS BibbleC-compiler-shared BibbleC-compiler-static
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+
+install(
+    DIRECTORY include/
+    DESTINATION include
+)

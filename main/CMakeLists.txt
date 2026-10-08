@@ -19,6 +19,13 @@ target_link_libraries(BibbleC-main PRIVATE BibbleC-compiler-shared)
 
 set_target_properties(BibbleC-main PROPERTIES OUTPUT_NAME "bibblec")
 
+install(
+    TARGETS BibbleC-main
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     add_custom_command(TARGET BibbleC-main PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different

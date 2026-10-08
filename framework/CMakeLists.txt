@@ -141,8 +141,27 @@ target_compile_features(BibbleC-framework-static PUBLIC cxx_std_20)
 target_link_libraries(BibbleC-framework-shared BibblIR-framework-shared)
 target_link_libraries(BibbleC-framework-static BibblIR-framework-static)
 
-set_target_properties(BibbleC-framework-shared PROPERTIES OUTPUT_NAME "bibblec-backend")
-set_target_properties(BibbleC-framework-static PROPERTIES OUTPUT_NAME "bibblec-backend-aio")
+set_target_properties(BibbleC-framework-shared PROPERTIES
+    OUTPUT_NAME "bibblec-backend"
+    VERSION 0.1.0
+    SOVERSION 0
+)
+set_target_properties(BibbleC-framework-static PROPERTIES
+    OUTPUT_NAME "bibblec-backend-aio"
+    VERSION 0.1.0
+)
 
 #TODO: vlex export api support
 vlex_generate(BibbleC-framework-shared src/lexer/lexer.vlex src/lexer include/BibbleC/lexer FILE_NAME_STYLE snake_case)
+
+install(
+    TARGETS BibbleC-framework-shared BibbleC-framework-static
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+
+install(
+    DIRECTORY include/
+    DESTINATION include
+)
