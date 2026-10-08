@@ -37,6 +37,8 @@
 
 #include "BibbleC/api.h"
 
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace bibblec::parser {
@@ -55,6 +57,12 @@ namespace bibblec::parser {
         std::string mImportedModuleName;
 
         scope::Scope* mActiveScope;
+
+        std::unordered_map<std::string, std::string> mModuleAliases;
+
+        void collectModuleAliases();
+        std::string resolveModuleAlias(const lexer::Token& aliasToken);
+        bool isQualifiedTypeAhead() const;
 
         lexer::Token current() const;
         lexer::Token consume();
@@ -90,6 +98,7 @@ namespace bibblec::parser {
         IntegerLiteralPtr parseCharacterLiteral();
         BooleanLiteralPtr parseBooleanLiteral();
         VariableExpressionPtr parseVariableExpression();
+        VariableExpressionPtr parseQualifiedVariableExpression();
         CallExpressionPtr parseCallExpression(ASTNodePtr callee);
         BinaryExpressionPtr parseIndexExpression(ASTNodePtr left, SourcePair source, lexer::Token operatorToken);
         NewExpressionPtr parseNewExpression();

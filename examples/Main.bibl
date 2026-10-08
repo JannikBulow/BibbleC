@@ -10,5 +10,5 @@ int main() {
         ints[i] = 5;
     }
     Test::Test test = new Test::Test(34, 35);
-    return test.sum();
+    return test.sum() + Test::Hello();
 }

@@ -190,7 +190,7 @@ namespace bibblec::parser {
         }
 
         mOwnScope->setCurrentReturnType(type->getReturnType());
-        mScope->addSymbol(std::make_unique<scope::Symbol>(mName, type));
+        mScope->addSymbol(std::make_unique<scope::Symbol>(mName, type, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName));
         mSymbol = mScope->getLatestSymbol();
 
         for (FunctionArgument& argument : mArguments) {

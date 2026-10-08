@@ -8,7 +8,7 @@
 namespace bibblec::parser {
     class BIBBLEC_EXPORT GlobalVariable : public ASTNode {
     public:
-        GlobalVariable(scope::Scope* scope, std::string name, Type* type, ASTNodePtr initialValue, bool constant, SourcePair source);
+        GlobalVariable(scope::Scope* scope, std::string name, std::string externalModuleName, Type* type, ASTNodePtr initialValue, bool constant, SourcePair source);
 
         std::vector<ASTNode*> getChildren() override;
 
@@ -20,6 +20,7 @@ namespace bibblec::parser {
 
     private:
         std::string mName;
+        std::string mExternalModuleName;
         ASTNodePtr mInitialValue;
 
         scope::Symbol* mSymbol;

@@ -3,6 +3,10 @@
 #include "BibbleC/scope/scope.h"
 
 namespace bibblec::scope {
+    static bool IsVisibleUnqualified(const Symbol& symbol, std::string_view currentModule) {
+        return symbol.module.empty() || symbol.module == currentModule;
+    }
+
     Scope::Scope(std::optional<std::string> moduleName, Scope* parent)
         : mParent(parent)
         , mModuleName(std::move(moduleName)) {
@@ -33,9 +37,10 @@ namespace bibblec::scope {
     }
 
     Symbol* Scope::resolveSymbol(std::string_view name) const {
+        std::string_view currentModule = getModuleName();
         for (const Scope& scope : *this) {
-            auto it = std::ranges::find_if(scope.mSymbols, [name](const SymbolPtr& symbol) {
-                return symbol->name == name;
+            auto it = std::ranges::find_if(scope.mSymbols, [&name, &currentModule](const SymbolPtr& symbol) {
+                return symbol->name == name && IsVisibleUnqualified(*symbol, currentModule);
             });
 
             if (it != scope.mSymbols.end()) {
@@ -43,6 +48,44 @@ namespace bibblec::scope {
             }
         }
         return nullptr;
+    }
+
+    Symbol* Scope::resolveQualifiedSymbol(std::string_view module, std::string_view name) const {
+        for (const Scope& scope : *this) {
+            auto it = std::ranges::find_if(scope.mSymbols, [&module, &name](const SymbolPtr& symbol) {
+                return symbol->name == name && symbol->module == module;
+            });
+
+            if (it != scope.mSymbols.end()) {
+                return it->get();
+            }
+        }
+        return nullptr;
+    }
+
+    std::vector<Symbol*> Scope::getVisibleCandidateFunctions(std::string_view name) const {
+        std::string_view currentModule = getModuleName();
+        std::vector<Symbol*> candidates;
+        for (const Scope& scope : *this) {
+            for (const SymbolPtr& symbol : scope.mSymbols) {
+                if (symbol->name == name && IsVisibleUnqualified(*symbol, currentModule)) {
+                    candidates.push_back(symbol.get());
+                }
+            }
+        }
+        return candidates;
+    }
+
+    std::vector<Symbol*> Scope::getQualifiedCandidateFunctions(std::string_view module, std::string_view name) const {
+        std::vector<Symbol*> candidates;
+        for (const Scope& scope : *this) {
+            for (const SymbolPtr& symbol : scope.mSymbols) {
+                if (symbol->name == name && symbol->module == module) {
+                    candidates.push_back(symbol.get());
+                }
+            }
+        }
+        return candidates;
     }
 
     std::vector<Symbol*> Scope::getCandidateFunctions(std::string_view name) const {

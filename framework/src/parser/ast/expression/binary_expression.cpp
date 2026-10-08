@@ -111,7 +111,7 @@ namespace bibblec::parser {
     bibblir::Value* BinaryExpression::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         auto createAssign = [&](bibblir::Value* left, bibblir::Value* right, bool eraseLeft = true) -> bibblir::Value* {
             if (auto variableExpression = dynamic_cast<VariableExpression*>(mLeft.get())) {
-                scope::Symbol* symbol = mScope->resolveSymbol(variableExpression->getName());
+                scope::Symbol* symbol = variableExpression->resolveSymbol();
 
                 if (symbol->constant) {
                     diag.reportCompilerError(mSource, "attempted mutation of constant");

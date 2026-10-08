@@ -22,6 +22,7 @@ namespace bibblec::scope {
 
     class BIBBLEC_EXPORT Symbol {
     public:
+        std::string module;
         std::string name;
         Type* type;
         std::vector<SymbolValue> values;
@@ -29,7 +30,7 @@ namespace bibblec::scope {
         bool removed = false;
         bool constant = false;
 
-        Symbol(std::string name, Type* type);
+        Symbol(std::string name, Type* type, std::string module = "");
 
         SymbolValue* getLatestValue(bibblir::BasicBlock* bb = nullptr);
         SymbolValue* getLatestValueX(bibblir::BasicBlock* bb);

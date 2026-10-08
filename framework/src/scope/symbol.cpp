@@ -2,9 +2,12 @@
 
 #include "BibbleC/scope/symbol.h"
 
+#include <algorithm>
+
 namespace bibblec::scope {
-    Symbol::Symbol(std::string name, Type* type)
-        : name(std::move(name))
+    Symbol::Symbol(std::string name, Type* type, std::string module)
+        : module(std::move(module))
+        , name(std::move(name))
         , type(type) {}
 
     SymbolValue* Symbol::getLatestValue(bibblir::BasicBlock* bb) {

@@ -46,6 +46,9 @@ namespace bibblec::scope {
 
         Symbol* getLatestSymbol() const;
         Symbol* resolveSymbol(std::string_view name) const;
+        Symbol* resolveQualifiedSymbol(std::string_view module, std::string_view name) const;
+        std::vector<Symbol*> getVisibleCandidateFunctions(std::string_view name) const;
+        std::vector<Symbol*> getQualifiedCandidateFunctions(std::string_view module, std::string_view name) const;
         std::vector<Symbol*> getCandidateFunctions(std::string_view name) const;
         void addSymbol(SymbolPtr symbol);
 

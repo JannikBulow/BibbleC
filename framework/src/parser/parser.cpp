@@ -6,12 +6,19 @@
 #include "BibbleC/type/class_type.h"
 
 namespace bibblec::parser {
+    static std::string LastSegment(std::string_view dottedName) {
+        size_t dot = dottedName.rfind('.');
+        return std::string(dottedName.substr(dot == std::string_view::npos ? 0 : dot + 1));
+    }
+
     Parser::Parser(std::vector<lexer::Token>& tokens, diagnostic::Diagnostics& diag, scope::Scope* globalScope, std::string importedModuleName)
         : mTokens(tokens)
         , mPosition(0)
         , mDiag(diag)
         , mImportedModuleName(std::move(importedModuleName))
-        , mActiveScope(globalScope) {}
+        , mActiveScope(globalScope) {
+        collectModuleAliases();
+    }
 
     std::vector<ASTNodePtr> Parser::parse() {
         std::vector<ASTNodePtr> ast;
@@ -24,6 +31,63 @@ namespace bibblec::parser {
         }
 
         return ast;
+    }
+
+    void Parser::collectModuleAliases() {
+        std::string ownModule(mActiveScope->getModuleName());
+        mModuleAliases.emplace(LastSegment(ownModule), std::move(ownModule));
+
+        for (size_t i = 0; i < mTokens.size(); ++i) {
+            if (mTokens[i].getTokenType() != lexer::TokenType::ImportKeyword) continue;
+
+            std::string module;
+            std::string alias;
+            size_t end = i + 1;
+            while (end < mTokens.size() && mTokens[end].getTokenType() == lexer::TokenType::Identifier) {
+                alias = std::string(mTokens[end].getText());
+                if (!module.empty()) module += '.';
+                module += alias;
+                end++;
+                if (end < mTokens.size() && mTokens[end].getTokenType() == lexer::TokenType::Dot) end++;
+                else break;
+            }
+            if (module.empty()) continue;
+
+            auto [it, inserted] = mModuleAliases.emplace(alias, module);
+            if (!inserted && it->second != module) {
+                mDiag.reportCompilerError(mTokens[i].getStartLocation(), mTokens[end - 1].getEndLocation(),
+                    std::format("module name '{}{}{}' is ambiguous: it could mean '{}{}{}' or '{}{}{}'",
+                        fmt::bold, alias, fmt::reset,
+                        fmt::bold, it->second, fmt::reset,
+                        fmt::bold, module, fmt::reset));
+                std::exit(1);
+            }
+        }
+    }
+
+    std::string Parser::resolveModuleAlias(const lexer::Token& aliasToken) {
+        auto it = mModuleAliases.find(std::string(aliasToken.getText()));
+        if (it == mModuleAliases.end()) {
+            mDiag.reportCompilerError(aliasToken.getStartLocation(), aliasToken.getEndLocation(),
+                std::format("unknown module '{}{}{}' (did you remember to import?)",
+                    fmt::bold, aliasToken.getText(), aliasToken.getName()));
+            std::exit(1);
+        }
+        return it->second;
+    }
+
+    bool Parser::isQualifiedTypeAhead() const {
+        auto typeAt = [this](size_t p) {
+            return p < mTokens.size() ? mTokens[p].getTokenType() : lexer::TokenType::EndOfFile;
+        };
+
+        size_t position = mPosition + 2;
+        if (typeAt(position) != lexer::TokenType::Identifier) return false;
+        position++;
+        while (typeAt(position) == lexer::TokenType::LeftBracket && typeAt(position + 1) == lexer::TokenType::RightBracket) {
+            position += 2;
+        }
+        return typeAt(position) == lexer::TokenType::Identifier;
     }
 
     lexer::Token Parser::current() const {
@@ -125,7 +189,7 @@ namespace bibblec::parser {
             bool parsePending = false;
 
             if (peek(1).getTokenType() == lexer::TokenType::DoubleColon) {
-                moduleName = consume().getText();
+                moduleName = resolveModuleAlias(consume());
                 consume();
                 expectToken(lexer::TokenType::Identifier);
                 name = consume().getText();
@@ -264,8 +328,12 @@ namespace bibblec::parser {
     ASTNodePtr Parser::parsePrimary() {
         lexer::SourceLocation sourceStart = current().getStartLocation();
 
-        if (Type* type = parseType()) {
-            return parseVariableDeclaration(sourceStart, type);
+        bool qualified = current().getTokenType() == lexer::TokenType::Identifier && peek(1).getTokenType() == lexer::TokenType::DoubleColon;
+
+        if (!qualified || isQualifiedTypeAhead()) {
+            if (Type* type = parseType()) {
+                return parseVariableDeclaration(sourceStart, type);
+            }
         }
 
         switch (current().getTokenType()) {
@@ -302,6 +370,7 @@ namespace bibblec::parser {
                 return parseBooleanLiteral();
 
             case lexer::TokenType::Identifier:
+                if (qualified) return parseQualifiedVariableExpression();
                 return parseVariableExpression();
 
             case lexer::TokenType::LeftParen:
@@ -552,7 +621,7 @@ namespace bibblec::parser {
 
         source.end = peek(-1).getEndLocation();
 
-        return std::make_unique<GlobalVariable>(mActiveScope, std::move(name), type, std::move(initialValue), constant, source);
+        return std::make_unique<GlobalVariable>(mActiveScope, std::move(name), mImportedModuleName, type, std::move(initialValue), constant, source);
     }
 
     ImportStatementPtr Parser::parseImportStatement() {
@@ -752,6 +821,17 @@ namespace bibblec::parser {
         SourcePair source(current().getStartLocation(), current().getEndLocation());
         std::string text(consume().getText());
         return std::make_unique<VariableExpression>(mActiveScope, std::move(text), source);
+    }
+
+    VariableExpressionPtr Parser::parseQualifiedVariableExpression() {
+        SourcePair source;
+        source.start = current().getStartLocation();
+        std::string module = resolveModuleAlias(consume());
+        consume();
+        expectToken(lexer::TokenType::Identifier);
+        std::string name(consume().getText());
+        source.end = peek(-1).getEndLocation();
+        return std::make_unique<VariableExpression>(mActiveScope, std::move(name), source, std::move(module));
     }
 
     CallExpressionPtr Parser::parseCallExpression(ASTNodePtr callee) {

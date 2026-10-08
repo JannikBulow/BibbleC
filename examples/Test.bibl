@@ -13,3 +13,7 @@ class Test {
         return this.a + this.b;
     }
 }
+
+int Hello() {
+    return 1;
+}

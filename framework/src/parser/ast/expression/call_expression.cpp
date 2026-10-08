@@ -98,8 +98,13 @@ namespace bibblec::parser {
             int thisParameter = 0;
 
             if (auto var = dynamic_cast<VariableExpression*>(mCallee.get())) {
-                candidates = mScope->getCandidateFunctions(var->getName());
-                errorName = var->getName();
+                if (var->isQualified()) {
+                    candidates = mScope->getQualifiedCandidateFunctions(var->getModule(), var->getName());
+                    errorName = std::format("{}::{}", var->getModule(), var->getName());
+                } else {
+                    candidates = mScope->getVisibleCandidateFunctions(var->getName());
+                    errorName = var->getName();
+                }
             } else if (auto memberAccess = dynamic_cast<MemberAccess*>(mCallee.get())) {
                 mIsMemberFunction = true;
                 if (memberAccess->mIsMethod) {

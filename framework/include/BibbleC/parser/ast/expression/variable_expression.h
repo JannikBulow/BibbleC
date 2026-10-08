@@ -8,9 +8,14 @@
 namespace bibblec::parser {
     class VariableExpression : public ASTNode {
     public:
-        VariableExpression(scope::Scope* scope, std::string name, SourcePair source);
+        VariableExpression(scope::Scope* scope, std::string name, SourcePair source, std::string module = "");
 
+        std::string_view getModule() const;
         std::string_view getName() const;
+
+        bool isQualified() const;
+
+        scope::Symbol* resolveSymbol() const;
 
         ASTNodePtr cloneExternal(scope::Scope* in) override;
 
@@ -19,6 +24,7 @@ namespace bibblec::parser {
         void typeCheck(diagnostic::Diagnostics& diag, bool& exit) override;
 
     private:
+        std::string mModule;
         std::string mName;
     };
 
