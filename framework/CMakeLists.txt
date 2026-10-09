@@ -142,11 +142,13 @@ target_link_libraries(BibbleC-framework-shared BibblIR-framework-shared)
 target_link_libraries(BibbleC-framework-static BibblIR-framework-static)
 
 set_target_properties(BibbleC-framework-shared PROPERTIES
+    EXPORT_NAME CompilerBackend
     OUTPUT_NAME "bibblec-backend"
     VERSION 0.1.0
     SOVERSION 0
 )
 set_target_properties(BibbleC-framework-static PROPERTIES
+    EXPORT_NAME CompilerBackendStatic
     OUTPUT_NAME "bibblec-backend-aio"
     VERSION 0.1.0
 )
@@ -156,6 +158,7 @@ vlex_generate(BibbleC-framework-shared src/lexer/lexer.vlex src/lexer include/Bi
 
 install(
     TARGETS BibbleC-framework-shared BibbleC-framework-static
+    EXPORT BibbleCTargets
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
@@ -164,4 +167,11 @@ install(
 install(
     DIRECTORY include/
     DESTINATION include
+)
+
+install(
+    EXPORT BibbleCTargets
+    FILE BibbleCTargets.cmake
+    NAMESPACE Bibble::
+    DESTINATION lib/cmake/BibbleC
 )

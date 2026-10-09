@@ -39,21 +39,24 @@ target_include_directories(BibbleC-compiler-static PUBLIC
 target_compile_features(BibbleC-compiler-shared PUBLIC cxx_std_20)
 target_compile_features(BibbleC-compiler-static PUBLIC cxx_std_20)
 
-target_link_libraries(BibbleC-compiler-shared BibbleC-framework-shared)
-target_link_libraries(BibbleC-compiler-static BibbleC-framework-static)
+target_link_libraries(BibbleC-compiler-shared PUBLIC BibbleC-framework-shared)
+target_link_libraries(BibbleC-compiler-static PUBLIC BibbleC-framework-static)
 
 set_target_properties(BibbleC-compiler-shared PROPERTIES
+    EXPORT_NAME Compiler
     OUTPUT_NAME "bibblec"
     VERSION 0.1.0
     SOVERSION 0
 )
 set_target_properties(BibbleC-compiler-static PROPERTIES
+    EXPORT_NAME CompilerStatic
     OUTPUT_NAME "bibblec-aio"
     VERSION 0.1.0
 )
 
 install(
     TARGETS BibbleC-compiler-shared BibbleC-compiler-static
+    EXPORT BibbleCTargets
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
@@ -62,4 +65,11 @@ install(
 install(
     DIRECTORY include/
     DESTINATION include
+)
+
+install(
+    EXPORT BibbleCTargets
+    FILE BibbleCTargets.cmake
+    NAMESPACE Bibble::
+    DESTINATION lib/cmake/BibbleC
 )
