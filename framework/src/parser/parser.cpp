@@ -577,6 +577,7 @@ namespace bibblec::parser {
 
         if (current().getTokenType() == lexer::TokenType::Semicolon) {
             body = std::nullopt;
+
             blockEnd = {current().getStartLocation(), current().getEndLocation()};
             consume();
         } else {
@@ -597,7 +598,7 @@ namespace bibblec::parser {
 
         mActiveScope = scope->getParent();
 
-        if (!mImportedModuleName.empty() && body.has_value()) body->clear();
+        if (!mImportedModuleName.empty()) body = std::nullopt;
 
         return std::make_unique<Function>(
             std::vector<lexer::Token>(),
