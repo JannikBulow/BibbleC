@@ -10,6 +10,7 @@
 #include "BibbleC/type/function_type.h"
 
 #include <bitset>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -44,7 +45,7 @@ namespace bibblec::parser {
             FunctionType* type,
             std::vector<FunctionArgument> arguments,
             scope::ScopePtr ownScope,
-            std::vector<ASTNodePtr> body,
+            std::optional<std::vector<ASTNodePtr>> body,
             SourcePair source,
             SourcePair blockEnd
         );
@@ -57,7 +58,7 @@ namespace bibblec::parser {
             FunctionType* type,
             std::vector<FunctionArgument> arguments,
             scope::ScopePtr ownScope,
-            std::vector<ASTNodePtr> body,
+            std::optional<std::vector<ASTNodePtr>> body,
             SourcePair source,
             SourcePair blockEnd
         );
@@ -79,7 +80,7 @@ namespace bibblec::parser {
         std::string mName;
         std::string mExternalModuleName;
         std::vector<FunctionArgument> mArguments;
-        std::vector<ASTNodePtr> mBody;
+        std::optional<std::vector<ASTNodePtr>> mBody;
         SourcePair mBlockEnd;
 
         scope::ScopePtr mOwnScope;

@@ -568,22 +568,29 @@ namespace bibblec::parser {
         FunctionType* functionType = FunctionType::Create(returnType, std::move(argumentTypes));
         std::vector<ASTNodePtr> body;
 
-        // if current is equal, create return with parseExpression
-
-        expectToken(lexer::TokenType::LeftBrace);
-        consume();
-
         scope::ScopePtr scope = std::make_unique<scope::Scope>(std::nullopt, mActiveScope);
         mActiveScope = scope.get();
 
-        while (current().getTokenType() != lexer::TokenType::RightBrace) {
-            body.push_back(parseExpression());
-            expectToken(lexer::TokenType::Semicolon);
+        SourcePair blockEnd;
+
+        // if current is equal, create return with parseExpression
+
+        if (current().getTokenType() == lexer::TokenType::Semicolon) {
+            blockEnd = {current().getStartLocation(), current().getEndLocation()};
+            consume();
+        } else {
+            expectToken(lexer::TokenType::LeftBrace);
+            consume();
+
+            while (current().getTokenType() != lexer::TokenType::RightBrace) {
+                body.push_back(parseExpression());
+                expectToken(lexer::TokenType::Semicolon);
+                consume();
+            }
+
+            blockEnd = {current().getStartLocation(), current().getEndLocation()};
             consume();
         }
-
-        SourcePair blockEnd(current().getStartLocation(), current().getEndLocation());
-        consume();
 
         mActiveScope = scope->getParent();
 

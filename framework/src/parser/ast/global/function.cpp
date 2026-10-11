@@ -24,7 +24,7 @@ namespace bibblec::parser {
         FunctionType* type,
         std::vector<FunctionArgument> arguments,
         scope::ScopePtr ownScope,
-        std::vector<ASTNodePtr> body,
+        std::optional<std::vector<ASTNodePtr>> body,
         SourcePair source,
         SourcePair blockEnd)
         : ASTNode(ownScope->getParent(), source, type)
@@ -47,7 +47,7 @@ namespace bibblec::parser {
         FunctionType* type,
         std::vector<FunctionArgument> arguments,
         scope::ScopePtr ownScope,
-        std::vector<ASTNodePtr> body,
+        std::optional<std::vector<ASTNodePtr>> body,
         SourcePair source,
         SourcePair blockEnd)
         : ASTNode(ownScope->getParent(), source, type)
@@ -68,8 +68,10 @@ namespace bibblec::parser {
 
     std::vector<ASTNode*> Function::getChildren() {
         std::vector<ASTNode*> children;
-        for (ASTNodePtr& node : mBody) {
-            children.push_back(node.get());
+        if (mBody.has_value()) {
+            for (ASTNodePtr& node : *mBody) {
+                children.push_back(node.get());
+            }
         }
         return children;
     }
@@ -77,14 +79,18 @@ namespace bibblec::parser {
     ASTNodePtr Function::cloneExternal(scope::Scope* in) {
         scope::ScopePtr ownScope = std::make_unique<scope::Scope>(std::nullopt, in);
         auto functionType = static_cast<FunctionType*>(mType);
-        return std::make_unique<Function>(mModifiers, mImplType, mName, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, functionType, mArguments, std::move(ownScope), std::vector<ASTNodePtr>(), mSource, mBlockEnd);
+        return std::make_unique<Function>(mModifiers, mImplType, mName, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, functionType, mArguments, std::move(ownScope), std::nullopt, mSource, mBlockEnd);
     }
 
     bibblir::Value* Function::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         auto function = static_cast<bibblir::Function*>(mSymbol->values.front().value);
 
         if (!mExternalModuleName.empty()) {
-            assert(mBody.empty());
+            assert(!mBody.has_value());
+            return function;
+        }
+
+        if (!mBody.has_value()) {
             return function;
         }
 
@@ -97,7 +103,7 @@ namespace bibblec::parser {
             argument.symbol->values.emplace_back(entryBB, arg);
         }
 
-        for (ASTNodePtr& node : mBody) {
+        for (ASTNodePtr& node : *mBody) {
             node->codegen(builder, module, diag);
         }
 
@@ -152,14 +158,16 @@ namespace bibblec::parser {
                 parameterTypes.push_back(argument.type);
             }
 
-            for (ASTNodePtr& node : mBody) {
-                if (auto ret = process(node.get())) {
-                    if (ret->getChildren().empty()) {
-                        returnType = Type::Get("void");
-                    } else {
-                        returnType = ret->getChildren()[0]->getType();
+            if (mBody.has_value()) {
+                for (ASTNodePtr& node : *mBody) {
+                    if (auto ret = process(node.get())) {
+                        if (ret->getChildren().empty()) {
+                            returnType = Type::Get("void");
+                        } else {
+                            returnType = ret->getChildren()[0]->getType();
+                        }
+                        break;
                     }
-                    break;
                 }
             }
 
@@ -174,8 +182,10 @@ namespace bibblec::parser {
             }
         }
 
-        for (ASTNodePtr& node : mBody) {
-            node->typeCheck(diag, exit);
+        if (mBody.has_value()) {
+            for (ASTNodePtr& node : *mBody) {
+                node->typeCheck(diag, exit);
+            }
         }
     }
 
@@ -201,6 +211,7 @@ namespace bibblec::parser {
 
     std::string Function::mangleName() {
         if (mName == "main") return ".main";
+        if (!mBody.has_value()) return mName;
 
         FunctionType* functionType = static_cast<FunctionType*>(mType);
 
