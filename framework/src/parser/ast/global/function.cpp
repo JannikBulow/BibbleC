@@ -86,7 +86,7 @@ namespace bibblec::parser {
         auto function = static_cast<bibblir::Function*>(mSymbol->values.front().value);
 
         if (!mExternalModuleName.empty()) {
-            assert(!mBody.has_value());
+            if (mBody.has_value()) assert(mBody->empty());
             return function;
         }
 
