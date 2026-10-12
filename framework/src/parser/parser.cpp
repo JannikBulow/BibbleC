@@ -365,6 +365,9 @@ namespace bibblec::parser {
             case lexer::TokenType::CharacterLiteral:
                 return parseCharacterLiteral();
 
+            case lexer::TokenType::StringLiteral:
+                return parseStringLiteral();
+
             case lexer::TokenType::TrueKeyword:
             case lexer::TokenType::FalseKeyword:
                 return parseBooleanLiteral();
@@ -826,6 +829,22 @@ namespace bibblec::parser {
         SourcePair source(current().getStartLocation(), current().getEndLocation());
         bool value = consume().getTokenType() == lexer::TokenType::TrueKeyword;
         return std::make_unique<BooleanLiteral>(mActiveScope, value, source);
+    }
+
+    StringLiteralPtr Parser::parseStringLiteral() {
+        SourcePair source;
+        source.start = current().getStartLocation();
+
+        std::string value;
+        value.reserve(current().getText().length());
+
+        while (current().getTokenType() == lexer::TokenType::StringLiteral) {
+            value += consume().getText();
+        }
+
+        source.end = peek(-1).getEndLocation();
+
+        return std::make_unique<StringLiteral>(mActiveScope, std::move(value), source);
     }
 
     VariableExpressionPtr Parser::parseVariableExpression() {

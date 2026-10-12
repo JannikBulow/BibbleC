@@ -25,6 +25,7 @@ set(SOURCES
     src/parser/ast/expression/integer_literal.cpp
     src/parser/ast/expression/member_access.cpp
     src/parser/ast/expression/new_expression.cpp
+    src/parser/ast/expression/string_literal.cpp
     src/parser/ast/expression/unary_expression.cpp
     src/parser/ast/expression/variable_expression.cpp
 
@@ -88,6 +89,7 @@ set(HEADERS
     include/BibbleC/parser/ast/statement/for_statement.h
     include/BibbleC/parser/ast/statement/if_statement.h
     include/BibbleC/parser/ast/statement/return_statement.h
+    include/BibbleC/parser/ast/expression/string_literal.h
     include/BibbleC/parser/ast/statement/variable_declaration.h
     include/BibbleC/parser/ast/statement/while_statement.h
 

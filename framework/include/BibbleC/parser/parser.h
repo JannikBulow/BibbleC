@@ -14,6 +14,7 @@
 #include "BibbleC/parser/ast/expression/integer_literal.h"
 #include "BibbleC/parser/ast/expression/member_access.h"
 #include "BibbleC/parser/ast/expression/new_expression.h"
+#include "BibbleC/parser/ast/expression/string_literal.h"
 #include "BibbleC/parser/ast/expression/unary_expression.h"
 #include "BibbleC/parser/ast/expression/variable_expression.h"
 
@@ -97,6 +98,7 @@ namespace bibblec::parser {
         IntegerLiteralPtr parseIntegerLiteral();
         IntegerLiteralPtr parseCharacterLiteral();
         BooleanLiteralPtr parseBooleanLiteral();
+        StringLiteralPtr parseStringLiteral();
         VariableExpressionPtr parseVariableExpression();
         VariableExpressionPtr parseQualifiedVariableExpression();
         CallExpressionPtr parseCallExpression(ASTNodePtr callee);
