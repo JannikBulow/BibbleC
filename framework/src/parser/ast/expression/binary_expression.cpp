@@ -43,6 +43,15 @@ namespace bibblec::parser {
             case lexer::TokenType::Caret:
                 mOperator = BitwiseXor;
                 break;
+            case lexer::TokenType::DoubleLessThan:
+                mOperator = BitwiseShiftLeft;
+                break;
+            case lexer::TokenType::DoubleGreaterThan:
+                mOperator = BitwiseShiftRight;
+                break;
+            case lexer::TokenType::TripleGreaterThan:
+                mOperator = BitwiseShiftRightArithmetic;
+                break;
             case lexer::TokenType::DoubleEqual:
                 mOperator = Equal;
                 break;
@@ -169,6 +178,13 @@ namespace bibblec::parser {
                 return builder.createOr(left, right);
             case BitwiseXor:
                 return builder.createXor(left, right);
+
+            case BitwiseShiftLeft:
+                return builder.createSHL(left, right);
+            case BitwiseShiftRight:
+                return builder.createSHR(left, right);
+            case BitwiseShiftRightArithmetic:
+                return builder.createSAR(left, right);
 
             case Equal:
                 return builder.createCmpEQ(left, right);
@@ -300,6 +316,9 @@ namespace bibblec::parser {
             case BitwiseAnd:
             case BitwiseOr:
             case BitwiseXor:
+            case BitwiseShiftLeft:
+            case BitwiseShiftRight:
+            case BitwiseShiftRightArithmetic:
                 if (mLeft->getType() != mRight->getType() && mLeft->getType()->isIntegerType() && mRight->getType()->isIntegerType()) {
                     if (mLeft->getType()->getSize() > mRight->getType()->getSize()) {
                         if (mRight->canImplicitCast(diag, mLeft->getType())) {

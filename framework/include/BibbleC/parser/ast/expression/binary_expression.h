@@ -21,6 +21,10 @@ namespace bibblec::parser {
             BitwiseOr,
             BitwiseXor,
 
+            BitwiseShiftLeft,
+            BitwiseShiftRight,
+            BitwiseShiftRightArithmetic,
+
             Equal,
             NotEqual,
             LessThan,
