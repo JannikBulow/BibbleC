@@ -74,8 +74,14 @@ tokens bibblec {
     short Type
     int Type
     long Type
+    ubyte Type
+    ushort Type
+    uint Type
+    ulong Type
+    char Type
     bool Type
     string Type
+    handle Type
 }
 
 comments {
