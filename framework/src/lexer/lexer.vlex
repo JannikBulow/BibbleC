@@ -75,6 +75,7 @@ tokens bibblec {
     int Type
     long Type
     bool Type
+    string Type
 }
 
 comments {
