@@ -34,6 +34,7 @@ namespace bibblec {
         virtual bool isErrorType() const { return false; }
         virtual bool isAutoType() const { return false; }
         virtual bool isVoidType() const { return false; }
+        virtual bool isHandleType() const { return false; }
         virtual bool isIntegerType() const { return false; }
         virtual bool isBooleanType() const { return false; }
         virtual bool isFunctionType() const { return false; }
