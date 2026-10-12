@@ -57,6 +57,7 @@ set(SOURCES
     src/type/function_type.cpp
     src/type/integer_type.cpp
     src/type/pending_type.cpp
+    src/type/string_type.cpp
     src/type/type.cpp
     src/type/void_type.cpp
 )
@@ -105,6 +106,7 @@ set(HEADERS
     include/BibbleC/type/function_type.h
     include/BibbleC/type/integer_type.h
     include/BibbleC/type/pending_type.h
+    include/BibbleC/type/string_type.h
     include/BibbleC/type/type.h
     include/BibbleC/type/void_type.h
 

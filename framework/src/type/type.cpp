@@ -7,6 +7,7 @@
 #include "BibbleC/type/error_type.h"
 #include "BibbleC/type/function_type.h"
 #include "BibbleC/type/integer_type.h"
+#include "BibbleC/type/string_type.h"
 #include "BibbleC/type/type.h"
 #include "BibbleC/type/void_type.h"
 
@@ -31,6 +32,7 @@ namespace bibblec {
 
         types["void"] = std::make_unique<VoidType>();
         types["bool"] = std::make_unique<BooleanType>();
+        types["string"] = std::make_unique<StringType>();
 
         types["auto"] = std::make_unique<AutoType>();
 
