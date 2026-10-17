@@ -6,6 +6,7 @@
 
 #include <BibblIR/ir/instruction/getmember_instruction.h>
 #include <BibblIR/ir/instruction/load_instruction.h>
+#include <BibblIR/ir/instruction/string_instruction.h>
 
 #include <BibblIR/ir/instruction.h>
 
@@ -22,49 +23,70 @@ namespace bibblec::parser {
 
     bibblir::Value* MemberAccess::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         bibblir::Value* object = mObject->codegen(builder, module, diag);
+        Type* objectType = mObject->getType();
 
-        bibblir::Value* getmember = builder.createGetMember(object, mIsMethod ? static_cast<bibblir::Value*>(mClassType->getBibblirMethod(mId)) : mClassType->getBibblirField(mId));
-        return builder.createLoad(getmember);
+        if (objectType->isStringType()) {
+            return builder.createStrlen(object);
+        } else if (objectType->isClassType()) {
+            bibblir::Value* getmember = builder.createGetMember(object, mIsMethod ? static_cast<bibblir::Value*>(mClassType->getBibblirMethod(mId)) : mClassType->getBibblirField(mId));
+            return builder.createLoad(getmember);
+        }
     }
 
     void MemberAccess::typeCheck(diagnostic::Diagnostics& diag, bool& exit) {
         mObject->typeCheck(diag, exit);
 
-        if (!mObject->getType()->isClassType()) {
-            diag.reportCompilerError(mSource,
-                std::format("'{}operator.{}' used on non-object value",
-                    fmt::bold, fmt::reset)
-            );
-            exit = true;
-            mType = Type::Get("error-type");
-            return;
-        }
-        mClassType = static_cast<ClassType*>(mObject->getType());
+        Type* objectType = mObject->getType();
 
-        ClassType::Member* member = mClassType->getMember(mId);
-        if (member) {
-            mType = member->type;
-            mIsMethod = member->isMethod;
-
-            if (mIsMethod) {
-                mType = static_cast<FunctionType*>(mType)->getReturnType();
+        if (objectType->isStringType()) {
+            if (mId != "length") {
+                diag.reportCompilerError(mSource,
+                     std::format("'{}string{}' has no member named '{}{}{}'",
+                         fmt::bold, fmt::reset,
+                         fmt::bold, mId, fmt::reset)
+                 );
+                exit = true;
+                mType = Type::Get("error-type");
+                return;
             }
-        } else {
-            auto functions = mScope->getCandidateFunctions(mId);
-            if (!functions.empty()) {
-                for (scope::Symbol* function : functions) {
-                    if (auto* functionType = dynamic_cast<FunctionType*>(function->type)) {
-                        if (functionType->getArgumentTypes()[0] == mClassType) {
-                            return;
+
+            mClassType = nullptr; // not needed
+            mType = Type::Get("ulong"); //TODO: implicit cast
+        } else if (objectType->isClassType()) {
+            mClassType = static_cast<ClassType*>(mObject->getType());
+
+            ClassType::Member* member = mClassType->getMember(mId);
+            if (member) {
+                mType = member->type;
+                mIsMethod = member->isMethod;
+
+                if (mIsMethod) {
+                    mType = static_cast<FunctionType*>(mType)->getReturnType();
+                }
+            } else {
+                auto functions = mScope->getCandidateFunctions(mId);
+                if (!functions.empty()) {
+                    for (scope::Symbol* function : functions) {
+                        if (auto* functionType = dynamic_cast<FunctionType*>(function->type)) {
+                            if (functionType->getArgumentTypes()[0] == mClassType) {
+                                return;
+                            }
                         }
                     }
                 }
-            }
 
+                diag.reportCompilerError(mSource,
+                    std::format("class '{}{}{}' has no member named '{}{}{}'",
+                        fmt::bold, mClassType->getName(), fmt::reset,
+                        fmt::bold, mId, fmt::reset)
+                );
+                exit = true;
+                mType = Type::Get("error-type");
+            }
+        } else {
             diag.reportCompilerError(mSource,
-                std::format("class '{}{}{}' has no member named '{}{}{}'",
-                    fmt::bold, mClassType->getName(), fmt::reset,
-                    fmt::bold, mId, fmt::reset)
+                std::format("'{}operator.{}' used on non-object value",
+                    fmt::bold, fmt::reset)
             );
             exit = true;
             mType = Type::Get("error-type");
