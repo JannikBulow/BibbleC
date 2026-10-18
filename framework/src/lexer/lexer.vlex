@@ -54,6 +54,8 @@ tokens bibblec {
     module
     import
 
+    native
+
     class
     new
 
