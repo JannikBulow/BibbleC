@@ -74,6 +74,8 @@ namespace bibblec::parser {
         int getBinaryOperatorPrecedence(lexer::TokenType tokenType);
         int getUnaryOperatorPrecedence(lexer::TokenType tokenType);
 
+        bool isModifierToken(lexer::TokenType tokenType);
+
         Type* parseType(bool parseArray = true);
 
         ASTNodePtr parseGlobal();
@@ -82,7 +84,7 @@ namespace bibblec::parser {
         ASTNodePtr parseParenthesizedExpression();
 
         ClassDeclarationPtr parseClassDeclaration();
-        FunctionPtr parseFunction(lexer::SourceLocation sourceStart, Type* returnType, Type* implType);
+        FunctionPtr parseFunction(lexer::SourceLocation sourceStart, std::vector<lexer::Token> modifierTokens, Type* returnType, Type* implType);
         GlobalVariablePtr parseGlobalVariable(lexer::SourceLocation sourceStart, Type* type, bool constant);
         ImportStatementPtr parseImportStatement();
 

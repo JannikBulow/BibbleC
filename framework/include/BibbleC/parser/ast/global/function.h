@@ -45,7 +45,7 @@ namespace bibblec::parser {
             FunctionType* type,
             std::vector<FunctionArgument> arguments,
             scope::ScopePtr ownScope,
-            std::optional<std::vector<ASTNodePtr>> body,
+            std::vector<ASTNodePtr> body,
             SourcePair source,
             SourcePair blockEnd
         );
@@ -58,12 +58,14 @@ namespace bibblec::parser {
             FunctionType* type,
             std::vector<FunctionArgument> arguments,
             scope::ScopePtr ownScope,
-            std::optional<std::vector<ASTNodePtr>> body,
+            std::vector<ASTNodePtr> body,
             SourcePair source,
             SourcePair blockEnd
         );
 
         std::string_view getName() const;
+
+        bool hasModifier(FunctionModifier modifier) const;
 
         std::vector<ASTNode*> getChildren() override;
 
@@ -80,7 +82,7 @@ namespace bibblec::parser {
         std::string mName;
         std::string mExternalModuleName;
         std::vector<FunctionArgument> mArguments;
-        std::optional<std::vector<ASTNodePtr>> mBody;
+        std::vector<ASTNodePtr> mBody;
         SourcePair mBlockEnd;
 
         scope::ScopePtr mOwnScope;

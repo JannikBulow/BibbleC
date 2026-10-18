@@ -24,7 +24,7 @@ namespace bibblec::parser {
         FunctionType* type,
         std::vector<FunctionArgument> arguments,
         scope::ScopePtr ownScope,
-        std::optional<std::vector<ASTNodePtr>> body,
+        std::vector<ASTNodePtr> body,
         SourcePair source,
         SourcePair blockEnd)
         : ASTNode(ownScope->getParent(), source, type)
@@ -35,7 +35,17 @@ namespace bibblec::parser {
         , mBody(std::move(body))
         , mBlockEnd(blockEnd)
         , mOwnScope(std::move(ownScope)) {
-        //TODO: modifiers
+        for (auto& token : modifierTokens) {
+            switch (token.getTokenType()) {
+                case lexer::TokenType::NativeKeyword:
+                    mModifiers.set(static_cast<std::size_t>(FunctionModifier::Native), true);
+                    break;
+
+                default:
+                    assert(false); // yeah this isn't the best
+            }
+        }
+        
         constructorImpl(type);
     }
 
@@ -47,7 +57,7 @@ namespace bibblec::parser {
         FunctionType* type,
         std::vector<FunctionArgument> arguments,
         scope::ScopePtr ownScope,
-        std::optional<std::vector<ASTNodePtr>> body,
+        std::vector<ASTNodePtr> body,
         SourcePair source,
         SourcePair blockEnd)
         : ASTNode(ownScope->getParent(), source, type)
@@ -66,12 +76,14 @@ namespace bibblec::parser {
         return mName;
     }
 
+    bool Function::hasModifier(FunctionModifier modifier) const {
+        return mModifiers.test(static_cast<std::size_t>(modifier));
+    }
+
     std::vector<ASTNode*> Function::getChildren() {
         std::vector<ASTNode*> children;
-        if (mBody.has_value()) {
-            for (ASTNodePtr& node : *mBody) {
-                children.push_back(node.get());
-            }
+        for (ASTNodePtr& node : mBody) {
+            children.push_back(node.get());
         }
         return children;
     }
@@ -79,18 +91,18 @@ namespace bibblec::parser {
     ASTNodePtr Function::cloneExternal(scope::Scope* in) {
         scope::ScopePtr ownScope = std::make_unique<scope::Scope>(std::nullopt, in);
         auto functionType = static_cast<FunctionType*>(mType);
-        return std::make_unique<Function>(mModifiers, mImplType, mName, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, functionType, mArguments, std::move(ownScope), std::nullopt, mSource, mBlockEnd);
+        return std::make_unique<Function>(mModifiers, mImplType, mName, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, functionType, mArguments, std::move(ownScope), std::vector<ASTNodePtr>(), mSource, mBlockEnd);
     }
 
     bibblir::Value* Function::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {
         auto function = static_cast<bibblir::Function*>(mSymbol->values.front().value);
 
         if (!mExternalModuleName.empty()) {
-            if (mBody.has_value()) assert(mBody->empty());
+            assert(mBody.empty());
             return function;
         }
 
-        if (!mBody.has_value()) {
+        if (hasModifier(FunctionModifier::Native)) {
             return function;
         }
 
@@ -103,7 +115,7 @@ namespace bibblec::parser {
             argument.symbol->values.emplace_back(entryBB, arg);
         }
 
-        for (ASTNodePtr& node : *mBody) {
+        for (ASTNodePtr& node : mBody) {
             node->codegen(builder, module, diag);
         }
 
@@ -158,16 +170,14 @@ namespace bibblec::parser {
                 parameterTypes.push_back(argument.type);
             }
 
-            if (mBody.has_value()) {
-                for (ASTNodePtr& node : *mBody) {
-                    if (auto ret = process(node.get())) {
-                        if (ret->getChildren().empty()) {
-                            returnType = Type::Get("void");
-                        } else {
-                            returnType = ret->getChildren()[0]->getType();
-                        }
-                        break;
+            for (ASTNodePtr& node : mBody) {
+                if (auto ret = process(node.get())) {
+                    if (ret->getChildren().empty()) {
+                        returnType = Type::Get("void");
+                    } else {
+                        returnType = ret->getChildren()[0]->getType();
                     }
+                    break;
                 }
             }
 
@@ -182,10 +192,8 @@ namespace bibblec::parser {
             }
         }
 
-        if (mBody.has_value()) {
-            for (ASTNodePtr& node : *mBody) {
-                node->typeCheck(diag, exit);
-            }
+        for (ASTNodePtr& node : mBody) {
+            node->typeCheck(diag, exit);
         }
     }
 
@@ -211,7 +219,7 @@ namespace bibblec::parser {
 
     std::string Function::mangleName() {
         if (mName == "main") return ".main";
-        if (!mBody.has_value() && mExternalModuleName.empty()) return mName; // no body plus not imported means a declaration which shouldn't be mangled
+        if (hasModifier(FunctionModifier::Native)) return mName;
 
         FunctionType* functionType = static_cast<FunctionType*>(mType);
 

@@ -183,6 +183,14 @@ namespace bibblec::parser {
         }
     }
 
+    bool Parser::isModifierToken(lexer::TokenType tokenType) {
+        constexpr std::array modifierTokenTypes = {
+            lexer::TokenType::NativeKeyword
+        };
+
+        return std::ranges::find(modifierTokenTypes, tokenType) != modifierTokenTypes.end();
+    }
+
     Type* Parser::parseType(bool parseArray) {
         auto recoverPosition = mPosition;
 
@@ -239,10 +247,15 @@ namespace bibblec::parser {
 
     ASTNodePtr Parser::parseGlobal() {
         lexer::SourceLocation sourceStart = current().getStartLocation();
+        std::vector<lexer::Token> modifierTokens;
+
+        while (isModifierToken(current().getTokenType())) {
+            modifierTokens.push_back(consume());
+        }
 
         if (Type* type = parseType()) {
             if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
-                return parseFunction(sourceStart, type, nullptr);
+                return parseFunction(sourceStart, std::move(modifierTokens), type, nullptr);
             } else {
                 return parseGlobalVariable(sourceStart, type, false);
             }
@@ -545,7 +558,7 @@ namespace bibblec::parser {
         return std::make_unique<ClassDeclaration>(mActiveScope, std::move(className), mImportedModuleName, std::move(fields), std::move(methods), source);
     }
 
-    FunctionPtr Parser::parseFunction(lexer::SourceLocation sourceStart, Type* returnType, Type* implType) {
+    FunctionPtr Parser::parseFunction(lexer::SourceLocation sourceStart, std::vector<lexer::Token> modifierTokens, Type* returnType, Type* implType) {
         SourcePair source;
         source.start = sourceStart;
 
@@ -574,7 +587,7 @@ namespace bibblec::parser {
         source.end = consume().getEndLocation();
 
         FunctionType* functionType = FunctionType::Create(returnType, std::move(argumentTypes));
-        std::optional<std::vector<ASTNodePtr>> body;
+        std::vector<ASTNodePtr> body;
 
         scope::ScopePtr scope = std::make_unique<scope::Scope>(std::nullopt, mActiveScope);
         mActiveScope = scope.get();
@@ -584,18 +597,14 @@ namespace bibblec::parser {
         // if current is equal, create return with parseExpression
 
         if (current().getTokenType() == lexer::TokenType::Semicolon) {
-            body = std::nullopt;
-
             blockEnd = {current().getStartLocation(), current().getEndLocation()};
             consume();
         } else {
-            body = std::vector<ASTNodePtr>();
-
             expectToken(lexer::TokenType::LeftBrace);
             consume();
 
             while (current().getTokenType() != lexer::TokenType::RightBrace) {
-                body->push_back(parseExpression());
+                body.push_back(parseExpression());
                 expectToken(lexer::TokenType::Semicolon);
                 consume();
             }
@@ -606,10 +615,10 @@ namespace bibblec::parser {
 
         mActiveScope = scope->getParent();
 
-        if (!mImportedModuleName.empty()) body = std::nullopt;
+        if (!mImportedModuleName.empty()) body.clear();
 
         return std::make_unique<Function>(
-            std::vector<lexer::Token>(),
+            std::move(modifierTokens),
             implType,
             std::move(name),
             mImportedModuleName,
