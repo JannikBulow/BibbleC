@@ -450,15 +450,16 @@ namespace bibblec::parser {
                 break;
 
             case Index:
-                if (!mLeft->getType()->isArrayType()) {
+                if (!mLeft->getType()->isArrayType() && !mLeft->getType()->isStringType()) {
                     diag.reportCompilerError(mSource,
                         std::format("no match for '{}operator[]{}' with type '{}{}{}'",
                             fmt::bold, fmt::reset, fmt::bold, mLeft->getType()->getName(), fmt::reset)
                     );
                     exit = true;
+                    mType = Type::Get("error-type");
                 }
                 if (!mRight->getType()->isIntegerType()) {
-                    Type* longType = Type::Get("long");
+                    Type* longType = Type::Get("ulong");
                     if (mRight->canImplicitCast(diag, longType)) {
                         mRight = CastTo(mRight, longType);
                     } else {
@@ -471,6 +472,8 @@ namespace bibblec::parser {
                 }
                 if (mLeft->getType()->isArrayType()) {
                     mType = static_cast<ArrayType*>(mLeft->getType())->getElementType();
+                } else if (mLeft->getType()->isStringType()) {
+                    mType = Type::Get("char");
                 }
                 break;
         }
