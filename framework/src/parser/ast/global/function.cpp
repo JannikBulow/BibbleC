@@ -211,7 +211,7 @@ namespace bibblec::parser {
 
     std::string Function::mangleName() {
         if (mName == "main") return ".main";
-        if (!mBody.has_value()) return mName;
+        if (!mBody.has_value() && mExternalModuleName.empty()) return mName; // no body plus not imported means a declaration which shouldn't be mangled
 
         FunctionType* functionType = static_cast<FunctionType*>(mType);
 
