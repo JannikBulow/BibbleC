@@ -4,6 +4,7 @@
 
 #include "BibbleC/type/function_type.h"
 
+#include <BibblIR/ir/instruction/array_instruction.h>
 #include <BibblIR/ir/instruction/getmember_instruction.h>
 #include <BibblIR/ir/instruction/load_instruction.h>
 #include <BibblIR/ir/instruction/string_instruction.h>
@@ -27,6 +28,8 @@ namespace bibblec::parser {
 
         if (objectType->isStringType()) {
             return builder.createStrlen(object);
+        } else if (objectType->isArrayType()) {
+            return builder.createArrayLength(object);
         } else if (objectType->isClassType()) {
             bibblir::Value* getmember = builder.createGetMember(object, mIsMethod ? static_cast<bibblir::Value*>(mClassType->getBibblirMethod(mId)) : mClassType->getBibblirField(mId));
             return builder.createLoad(getmember);
@@ -38,11 +41,11 @@ namespace bibblec::parser {
 
         Type* objectType = mObject->getType();
 
-        if (objectType->isStringType()) {
+        if (objectType->isStringType() || objectType->isArrayType()) {
             if (mId != "length") {
                 diag.reportCompilerError(mSource,
-                     std::format("'{}string{}' has no member named '{}{}{}'",
-                         fmt::bold, fmt::reset,
+                     std::format("'{}{}{}' has no member named '{}{}{}'",
+                         fmt::bold, objectType->getName(), fmt::reset,
                          fmt::bold, mId, fmt::reset)
                  );
                 exit = true;
@@ -53,7 +56,7 @@ namespace bibblec::parser {
             mClassType = nullptr; // not needed
             mType = Type::Get("ulong"); //TODO: implicit cast
         } else if (objectType->isClassType()) {
-            mClassType = static_cast<ClassType*>(mObject->getType());
+            mClassType = static_cast<ClassType*>(objectType);
 
             ClassType::Member* member = mClassType->getMember(mId);
             if (member) {
