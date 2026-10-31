@@ -146,6 +146,10 @@ namespace bibblec::parser {
             function = bibblir::Function::Create(module, static_cast<bibblir::FunctionType*>(mType->getBibblirType()), std::move(mangledName));
         }
 
+        if (auto* attribute = FindAttribute(mAttributes, "noreturn")) {
+            function->properties().noreturn = true;
+        }
+
         mSymbol->values.push_back({nullptr, function});
     }
 
