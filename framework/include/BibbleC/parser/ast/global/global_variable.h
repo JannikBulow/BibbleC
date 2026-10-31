@@ -3,12 +3,14 @@
 #ifndef BIBBLEC_PARSER_AST_GLOBAL_GLOBAL_VARIABLE_H
 #define BIBBLEC_PARSER_AST_GLOBAL_GLOBAL_VARIABLE_H
 
+#include "BibbleC/parser/ast/global/attribute.h"
+
 #include "BibbleC/parser/ast/node.h"
 
 namespace bibblec::parser {
     class BIBBLEC_EXPORT GlobalVariable : public ASTNode {
     public:
-        GlobalVariable(scope::Scope* scope, std::string name, std::string externalModuleName, Type* type, ASTNodePtr initialValue, bool constant, SourcePair source);
+        GlobalVariable(scope::Scope* scope, std::vector<Attribute> attributes, std::string name, std::string externalModuleName, Type* type, ASTNodePtr initialValue, bool constant, SourcePair source);
 
         std::vector<ASTNode*> getChildren() override;
 
@@ -19,6 +21,7 @@ namespace bibblec::parser {
         void typeCheck(diagnostic::Diagnostics& diag, bool& exit) override;
 
     private:
+        std::vector<Attribute> mAttributes;
         std::string mName;
         std::string mExternalModuleName;
         ASTNodePtr mInitialValue;

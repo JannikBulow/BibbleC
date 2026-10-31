@@ -5,6 +5,8 @@
 
 #include "BibbleC/lexer/token.h"
 
+#include "BibbleC/parser/ast/global/attribute.h"
+
 #include "BibbleC/parser/ast/node.h"
 
 #include "BibbleC/type/function_type.h"
@@ -38,6 +40,7 @@ namespace bibblec::parser {
         friend struct ClassMethod;
     public:
         Function(
+            std::vector<Attribute> attributes,
             std::vector<lexer::Token> modifierTokens,
             Type* implType,
             std::string name,
@@ -51,6 +54,7 @@ namespace bibblec::parser {
         );
 
         Function(
+            std::vector<Attribute> attributes,
             FunctionModifiers modifiers,
             Type* implType,
             std::string name,
@@ -77,6 +81,7 @@ namespace bibblec::parser {
         void typeCheck(diagnostic::Diagnostics& diag, bool& exit) override;
 
     private:
+        std::vector<Attribute> mAttributes;
         FunctionModifiers mModifiers;
         Type* mImplType;
         std::string mName;

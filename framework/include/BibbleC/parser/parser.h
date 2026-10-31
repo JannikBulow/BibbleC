@@ -18,6 +18,7 @@
 #include "BibbleC/parser/ast/expression/unary_expression.h"
 #include "BibbleC/parser/ast/expression/variable_expression.h"
 
+#include "BibbleC/parser/ast/global/attribute.h"
 #include "BibbleC/parser/ast/global/class_declaration.h"
 #include "BibbleC/parser/ast/global/function.h"
 #include "BibbleC/parser/ast/global/global_variable.h"
@@ -83,9 +84,10 @@ namespace bibblec::parser {
         ASTNodePtr parsePrimary();
         ASTNodePtr parseParenthesizedExpression();
 
-        ClassDeclarationPtr parseClassDeclaration();
-        FunctionPtr parseFunction(lexer::SourceLocation sourceStart, std::vector<lexer::Token> modifierTokens, Type* returnType, Type* implType);
-        GlobalVariablePtr parseGlobalVariable(lexer::SourceLocation sourceStart, Type* type, bool constant);
+        Attribute parseAttribute();
+        ClassDeclarationPtr parseClassDeclaration(std::vector<Attribute> attributes);
+        FunctionPtr parseFunction(std::vector<Attribute> attributes, lexer::SourceLocation sourceStart, std::vector<lexer::Token> modifierTokens, Type* returnType, Type* implType);
+        GlobalVariablePtr parseGlobalVariable(std::vector<Attribute> attributes, lexer::SourceLocation sourceStart, Type* type, bool constant);
         ImportStatementPtr parseImportStatement();
 
         BreakStatementPtr parseBreakStatement();

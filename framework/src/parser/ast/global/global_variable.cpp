@@ -3,8 +3,9 @@
 #include "BibbleC/parser/ast/global/global_variable.h"
 
 namespace bibblec::parser {
-    GlobalVariable::GlobalVariable(scope::Scope* scope, std::string name, std::string externalModuleName, Type* type, ASTNodePtr initialValue, bool constant, SourcePair source)
+    GlobalVariable::GlobalVariable(scope::Scope* scope, std::vector<Attribute> attributes, std::string name, std::string externalModuleName, Type* type, ASTNodePtr initialValue, bool constant, SourcePair source)
         : ASTNode(scope, source, type)
+        , mAttributes(std::move(attributes))
         , mName(std::move(name))
         , mExternalModuleName(std::move(externalModuleName))
         , mInitialValue(std::move(initialValue)) {
@@ -23,7 +24,7 @@ namespace bibblec::parser {
         if (!constant) return nullptr;
 
         ASTNodePtr newInitialValue = mInitialValue ? mInitialValue->cloneExternal(in) : nullptr;
-        return std::make_unique<GlobalVariable>(in, mName, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, mType, std::move(newInitialValue), constant, mSource);
+        return std::make_unique<GlobalVariable>(in, mAttributes, mName, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, mType, std::move(newInitialValue), constant, mSource);
     }
 
     bibblir::Value* GlobalVariable::codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) {

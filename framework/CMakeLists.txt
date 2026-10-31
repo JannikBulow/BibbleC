@@ -79,6 +79,7 @@ set(HEADERS
     include/BibbleC/parser/ast/expression/unary_expression.h
     include/BibbleC/parser/ast/expression/variable_expression.h
 
+    include/BibbleC/parser/ast/global/attribute.h
     include/BibbleC/parser/ast/global/class_declaration.h
     include/BibbleC/parser/ast/global/function.h
     include/BibbleC/parser/ast/global/global_variable.h

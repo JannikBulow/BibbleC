@@ -246,6 +246,11 @@ namespace bibblec::parser {
     }
 
     ASTNodePtr Parser::parseGlobal() {
+        std::vector<Attribute> attributes;
+        while (current().getTokenType() == lexer::TokenType::Asperand) {
+            attributes.push_back(parseAttribute());
+        }
+
         lexer::SourceLocation sourceStart = current().getStartLocation();
         std::vector<lexer::Token> modifierTokens;
 
@@ -255,19 +260,19 @@ namespace bibblec::parser {
 
         if (Type* type = parseType()) {
             if (peek(1).getTokenType() == lexer::TokenType::LeftParen) {
-                return parseFunction(sourceStart, std::move(modifierTokens), type, nullptr);
+                return parseFunction(std::move(attributes), sourceStart, std::move(modifierTokens), type, nullptr);
             } else {
-                return parseGlobalVariable(sourceStart, type, false);
+                return parseGlobalVariable(std::move(attributes), sourceStart, type, false);
             }
         }
 
         switch (current().getTokenType()) {
             case lexer::TokenType::ClassKeyword:
-                return parseClassDeclaration();
+                return parseClassDeclaration(std::move(attributes));
 
             case lexer::TokenType::ConstKeyword:
                 consume();
-                return parseGlobalVariable(sourceStart, parseType(), true);
+                return parseGlobalVariable(std::move(attributes), sourceStart, parseType(), true);
 
             case lexer::TokenType::ImportKeyword:
                 return parseImportStatement();
@@ -432,7 +437,28 @@ namespace bibblec::parser {
         return expression;
     }
 
-    ClassDeclarationPtr Parser::parseClassDeclaration() {
+    Attribute Parser::parseAttribute() {
+        consume(); // @
+
+        expectToken(lexer::TokenType::Identifier);
+        std::string name(consume().getText());
+
+        std::vector<SharedASTNodePtr> arguments;
+        if (current().getTokenType() == lexer::TokenType::LeftParen) {
+            while (current().getTokenType() != lexer::TokenType::RightParen) {
+                arguments.push_back(parseExpression());
+
+                if (current().getTokenType() != lexer::TokenType::RightParen) {
+                    expectToken(lexer::TokenType::Comma);
+                    consume();
+                }
+            }
+        }
+
+        return Attribute(std::move(name), std::move(arguments));
+    }
+
+    ClassDeclarationPtr Parser::parseClassDeclaration(std::vector<Attribute> attributes) {
         SourcePair source;
         source.start = consume().getStartLocation();
 
@@ -539,6 +565,7 @@ namespace bibblec::parser {
             if (!mImportedModuleName.empty()) body.clear();
 
             FunctionPtr impl = std::make_unique<Function>(
+                std::vector<Attribute>(), // TODO: method attributes
                 std::vector<lexer::Token>(),
                 classType,
                 std::move(name),
@@ -555,10 +582,10 @@ namespace bibblec::parser {
         }
         source.end = consume().getEndLocation();
 
-        return std::make_unique<ClassDeclaration>(mActiveScope, std::move(className), mImportedModuleName, std::move(fields), std::move(methods), source);
+        return std::make_unique<ClassDeclaration>(mActiveScope, std::move(attributes), std::move(className), mImportedModuleName, std::move(fields), std::move(methods), source);
     }
 
-    FunctionPtr Parser::parseFunction(lexer::SourceLocation sourceStart, std::vector<lexer::Token> modifierTokens, Type* returnType, Type* implType) {
+    FunctionPtr Parser::parseFunction(std::vector<Attribute> attributes, lexer::SourceLocation sourceStart, std::vector<lexer::Token> modifierTokens, Type* returnType, Type* implType) {
         SourcePair source;
         source.start = sourceStart;
 
@@ -618,6 +645,7 @@ namespace bibblec::parser {
         if (!mImportedModuleName.empty()) body.clear();
 
         return std::make_unique<Function>(
+            std::move(attributes),
             std::move(modifierTokens),
             implType,
             std::move(name),
@@ -631,7 +659,7 @@ namespace bibblec::parser {
         );
     }
 
-    GlobalVariablePtr Parser::parseGlobalVariable(lexer::SourceLocation sourceStart, Type* type, bool constant) {
+    GlobalVariablePtr Parser::parseGlobalVariable(std::vector<Attribute> attributes, lexer::SourceLocation sourceStart, Type* type, bool constant) {
         SourcePair source;
         source.start = sourceStart;
 
@@ -649,7 +677,7 @@ namespace bibblec::parser {
 
         source.end = peek(-1).getEndLocation();
 
-        return std::make_unique<GlobalVariable>(mActiveScope, std::move(name), mImportedModuleName, type, std::move(initialValue), constant, source);
+        return std::make_unique<GlobalVariable>(mActiveScope, std::move(attributes), std::move(name), mImportedModuleName, type, std::move(initialValue), constant, source);
     }
 
     ImportStatementPtr Parser::parseImportStatement() {

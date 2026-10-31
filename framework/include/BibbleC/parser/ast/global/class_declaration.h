@@ -3,6 +3,7 @@
 #ifndef BIBBLEC_PARSER_AST_GLOBAL_CLASS_DECLARATION_H
 #define BIBBLEC_PARSER_AST_GLOBAL_CLASS_DECLARATION_H
 
+#include "BibbleC/parser/ast/global/attribute.h"
 #include "BibbleC/parser/ast/global/function.h"
 
 #include "BibbleC/parser/ast/node.h"
@@ -40,7 +41,7 @@ namespace bibblec::parser {
 
     class BIBBLEC_EXPORT ClassDeclaration : public ASTNode {
     public:
-        ClassDeclaration(scope::Scope* scope, std::string name, std::string externalModuleName, std::vector<ClassField> fields, std::vector<ClassMethod> methods, SourcePair source);
+        ClassDeclaration(scope::Scope* scope, std::vector<Attribute> attributes, std::string name, std::string externalModuleName, std::vector<ClassField> fields, std::vector<ClassMethod> methods, SourcePair source);
 
         std::vector<ASTNode*> getChildren() override;
 
@@ -52,6 +53,7 @@ namespace bibblec::parser {
         void typeCheck(diagnostic::Diagnostics& diag, bool& exit) override;
 
     private:
+        std::vector<Attribute> mAttributes;
         std::string mName;
         std::string mExternalModuleName;
         std::vector<ClassField> mFields;

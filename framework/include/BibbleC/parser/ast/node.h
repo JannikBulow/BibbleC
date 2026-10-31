@@ -23,6 +23,7 @@
 namespace bibblec::parser {
     class ASTNode;
     using ASTNodePtr = std::unique_ptr<ASTNode>;
+    using SharedASTNodePtr = std::shared_ptr<ASTNode>;
 
     class BIBBLEC_EXPORT ASTNode {
     public:
