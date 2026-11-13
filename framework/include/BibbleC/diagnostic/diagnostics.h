@@ -31,8 +31,10 @@ namespace bibblec {
             "implicit"
         };
 
-        class BIBBLEC_EXPORT IListener {
+        class IListener {
         public:
+            virtual ~IListener() = default;
+
             virtual void onCompilerError(lexer::SourceLocation start, lexer::SourceLocation end, std::string_view message, std::string_view fileName, std::string_view fileText) = 0;
             virtual void onCompilerWarning(lexer::SourceLocation start, lexer::SourceLocation end, std::string_view message, std::string_view fileName, std::string_view fileText) = 0;
         };
