@@ -43,6 +43,8 @@ namespace bibblec {
         public:
             Diagnostics(std::ostream& errorStream, std::ostream& warningStream);
 
+            bool hadErrors() const { return mErrorCount > 0; }
+
             void addListener(std::unique_ptr<IListener> listener);
 
             void addText(std::string path, std::string_view text);
