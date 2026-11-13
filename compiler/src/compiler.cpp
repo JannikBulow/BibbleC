@@ -112,6 +112,7 @@ namespace bibblec {
         parser::Parser parser(module.tokens, mDiag, module.globalScope.get(), "");
 
         module.ast = parser.parse();
+        if (mDiag.hadErrors()) std::exit(1);
     }
 
     void Compiler::doImports(Module& module) {
