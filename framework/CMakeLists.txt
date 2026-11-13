@@ -162,6 +162,7 @@ set_target_properties(BibbleC-framework-static PROPERTIES
 
 #TODO: vlex export api support
 vlex_generate(BibbleC-framework-shared src/lexer/lexer.vlex src/lexer include/BibbleC/lexer FILE_NAME_STYLE snake_case)
+vlex_generate(BibbleC-framework-static src/lexer/lexer.vlex src/lexer include/BibbleC/lexer FILE_NAME_STYLE snake_case)
 
 install(
     TARGETS BibbleC-framework-shared BibbleC-framework-static
