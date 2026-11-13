@@ -13,6 +13,10 @@ namespace bibblec::diagnostic {
         std::ranges::copy(KNOWN_WARNINGS, std::back_inserter(mWarnings));
     }
 
+    void Diagnostics::addListener(std::unique_ptr<IListener> listener) {
+        if (listener) mListeners.push_back(std::move(listener));
+    }
+
     void Diagnostics::addText(std::string path, std::string_view text) {
         mTexts[std::move(path)] = text;
     }
@@ -58,13 +62,17 @@ namespace bibblec::diagnostic {
         mErrorStream << std::format("    {} | {}{}{}^{}{}\n", spacesBefore, spacesAfter, fmt::bold, fmt::red, std::string(error.length() - 1, '~'), fmt::reset);
 
         mErrorCount++;
+
+        for (auto& listener : mListeners) {
+            listener->onCompilerError(start, end, message, start.file, text);
+        }
     }
 
     void Diagnostics::reportCompilerWarning(lexer::SourceLocation start, lexer::SourceLocation end, std::string_view warning, std::string_view message) {
         auto it = std::find(mWarnings.begin(), mWarnings.end(), warning);
         if (it == mWarnings.end()) return;
 
-        auto text = mTexts[std::string(start.file)];
+        std::string_view text = mTexts.find(start.file)->second;
 
         unsigned int lineStart = getLinePosition(text, start.line - 1);
         unsigned int lineEnd = getLinePosition(text, end.line) - 1;
@@ -81,6 +89,10 @@ namespace bibblec::diagnostic {
         mWarningStream << std::format(" [{}{}-W{}{}]\n", fmt::bold, fmt::yellow, warning, fmt::reset);
         mWarningStream << std::format("    {} | {}{}{}{}{}{}\n", start.line, before, fmt::bold, fmt::yellow, error, fmt::reset, after);
         mWarningStream << std::format("    {} | {}{}{}^{}{}\n", spacesBefore, spacesAfter, fmt::bold, fmt::yellow, std::string(error.length()-1, '~'), fmt::reset);
+
+        for (auto& listener : mListeners) {
+            listener->onCompilerWarning(start, end, message, start.file, text);
+        }
     }
 
     unsigned int Diagnostics::getLinePosition(std::string_view text, unsigned int lineNumber) {

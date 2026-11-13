@@ -12,6 +12,7 @@
 #include "BibbleC/api.h"
 
 #include <array>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <unordered_map>
@@ -30,9 +31,17 @@ namespace bibblec {
             "implicit"
         };
 
+        class BIBBLEC_EXPORT IListener {
+        public:
+            virtual void onCompilerError(lexer::SourceLocation start, lexer::SourceLocation end, std::string_view message, std::string_view fileName, std::string_view fileText) = 0;
+            virtual void onCompilerWarning(lexer::SourceLocation start, lexer::SourceLocation end, std::string_view message, std::string_view fileName, std::string_view fileText) = 0;
+        };
+
         class BIBBLEC_EXPORT Diagnostics {
         public:
             Diagnostics(std::ostream& errorStream, std::ostream& warningStream);
+
+            void addListener(std::unique_ptr<IListener> listener);
 
             void addText(std::string path, std::string_view text);
             void setWarning(std::string_view warning, bool enable);
@@ -48,6 +57,8 @@ namespace bibblec {
         private:
             std::ostream& mErrorStream;
             std::ostream& mWarningStream;
+
+            std::vector<std::unique_ptr<IListener>> mListeners;
 
             int mErrorCount = 0;
 
