@@ -51,6 +51,8 @@ namespace bibblec::parser {
         std::vector<ASTNodePtr> parse();
 
     private:
+        struct Abort {};
+
         std::vector<lexer::Token>& mTokens;
         size_t mPosition;
 
@@ -66,11 +68,16 @@ namespace bibblec::parser {
         std::string resolveModuleAlias(const lexer::Token& aliasToken);
         bool isQualifiedTypeAhead() const;
 
+        bool isAtEnd() const;
+
         lexer::Token current() const;
         lexer::Token consume();
         lexer::Token peek(int offset) const;
 
         void expectToken(lexer::TokenType type);
+
+        void synchronizeGlobal(size_t failedAt);
+        void synchronizeBlock(size_t failedAt);
 
         int getBinaryOperatorPrecedence(lexer::TokenType tokenType);
         int getUnaryOperatorPrecedence(lexer::TokenType tokenType);
@@ -84,8 +91,11 @@ namespace bibblec::parser {
         ASTNodePtr parsePrimary();
         ASTNodePtr parseParenthesizedExpression();
 
+        void parseBlockBody(std::vector<ASTNodePtr>& body);
+
         Attribute parseAttribute();
         ClassDeclarationPtr parseClassDeclaration(std::vector<Attribute> attributes);
+        void parseClassMember(const std::string& className, Type* classType, std::vector<ClassField>& fields, std::vector<ClassMethod>& methods);
         FunctionPtr parseFunction(std::vector<Attribute> attributes, lexer::SourceLocation sourceStart, std::vector<lexer::Token> modifierTokens, Type* returnType, Type* implType);
         GlobalVariablePtr parseGlobalVariable(std::vector<Attribute> attributes, lexer::SourceLocation sourceStart, Type* type, bool constant);
         ImportStatementPtr parseImportStatement();

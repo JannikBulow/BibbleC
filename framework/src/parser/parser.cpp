@@ -11,6 +11,57 @@ namespace bibblec::parser {
         return std::string(dottedName.substr(dot == std::string_view::npos ? 0 : dot + 1));
     }
 
+    static bool StartsGlobal(lexer::TokenType type) {
+        switch (type) {
+            case lexer::TokenType::Type:
+            case lexer::TokenType::ClassKeyword:
+            case lexer::TokenType::ConstKeyword:
+            case lexer::TokenType::ImportKeyword:
+            case lexer::TokenType::ModuleKeyword:
+            case lexer::TokenType::Asperand:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    static bool StartsStatement(lexer::TokenType type) {
+        switch (type) {
+            case lexer::TokenType::Type:
+            case lexer::TokenType::BreakKeyword:
+            case lexer::TokenType::ContinueKeyword:
+            case lexer::TokenType::ForKeyword:
+            case lexer::TokenType::IfKeyword:
+            case lexer::TokenType::ReturnKeyword:
+            case lexer::TokenType::WhileKeyword:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    namespace {
+        class ScopeGuard {
+        public:
+            ScopeGuard(scope::Scope*& active, scope::Scope* next)
+                : mActive(active)
+                , mPrevious(active) {
+                mActive = next;
+            }
+
+            ~ScopeGuard() {
+                mActive = mPrevious;
+            }
+
+            ScopeGuard(const ScopeGuard&) = delete;
+            ScopeGuard& operator=(const ScopeGuard&) = delete;
+
+        private:
+            scope::Scope*& mActive;
+            scope::Scope* mPrevious;
+        };
+    }
+
     Parser::Parser(std::vector<lexer::Token>& tokens, diagnostic::Diagnostics& diag, scope::Scope* globalScope, std::string importedModuleName)
         : mTokens(tokens)
         , mPosition(0)
@@ -23,10 +74,16 @@ namespace bibblec::parser {
     std::vector<ASTNodePtr> Parser::parse() {
         std::vector<ASTNodePtr> ast;
 
-        while (mPosition < mTokens.size()) {
-            auto node = parseGlobal();
-            if (node) {
-                ast.push_back(std::move(node));
+        while (!isAtEnd()) {
+            size_t globalStart = mPosition;
+
+            try {
+                auto node = parseGlobal();
+                if (node) {
+                    ast.push_back(std::move(node));
+                }
+            } catch (const Abort&) {
+                synchronizeGlobal(globalStart);
             }
         }
 
@@ -60,7 +117,7 @@ namespace bibblec::parser {
                         fmt::bold, alias, fmt::reset,
                         fmt::bold, it->second, fmt::reset,
                         fmt::bold, module, fmt::reset));
-                std::exit(1);
+                throw Abort();
             }
         }
     }
@@ -71,7 +128,7 @@ namespace bibblec::parser {
             mDiag.reportCompilerError(aliasToken.getStartLocation(), aliasToken.getEndLocation(),
                 std::format("unknown module '{}{}{}' (did you remember to import?)",
                     fmt::bold, aliasToken.getText(), aliasToken.getName()));
-            std::exit(1);
+            throw Abort();
         }
         return it->second;
     }
@@ -90,16 +147,30 @@ namespace bibblec::parser {
         return typeAt(position) == lexer::TokenType::Identifier;
     }
 
+    bool Parser::isAtEnd() const {
+        return mPosition >= mTokens.size() || current().getTokenType() == lexer::TokenType::EndOfFile;
+    }
+
     lexer::Token Parser::current() const {
-        return mTokens[mPosition];
+        return peek(0);
     }
 
     lexer::Token Parser::consume() {
-        return mTokens[mPosition++];
+        lexer::Token token = current();
+        if (!isAtEnd()) mPosition++;
+        return token;
     }
 
     lexer::Token Parser::peek(int offset) const {
-        return mTokens[mPosition + offset];
+        std::ptrdiff_t index = static_cast<std::ptrdiff_t>(mPosition) + offset;
+        if (index < 0) index = 0;
+
+        if (static_cast<size_t>(index) < mTokens.size()) {
+            return mTokens[static_cast<size_t>(index)];
+        }
+
+        lexer::SourceLocation end = mTokens.empty() ? lexer::SourceLocation() : mTokens.back().getEndLocation();
+        return lexer::Token("", lexer::TokenType::EndOfFile, end, end);
     }
 
     void Parser::expectToken(lexer::TokenType type) {
@@ -112,8 +183,55 @@ namespace bibblec::parser {
                     fmt::bold, temp.getName(), fmt::reset,
                     fmt::bold, current().getText(), fmt::reset)
             );
-            std::exit(1);
+            throw Abort();
         }
+    }
+
+    void Parser::synchronizeGlobal(size_t failedAt) {
+        int depth = 0;
+
+        while (!isAtEnd()) {
+            lexer::TokenType type = current().getTokenType();
+
+            if (depth == 0 && (StartsGlobal(type) || isModifierToken(type))) break;
+
+            consume();
+
+            if (type == lexer::TokenType::LeftBrace) {
+                depth++;
+            } else if (type == lexer::TokenType::RightBrace) {
+                if (depth > 0) depth--;
+                if (depth == 0) break;
+            } else if (type == lexer::TokenType::Semicolon && depth == 0) {
+                break;
+            }
+        }
+
+        if (mPosition == failedAt && !isAtEnd()) consume();
+    }
+
+    void Parser::synchronizeBlock(size_t failedAt) {
+        int depth = 0;
+
+        while (!isAtEnd()) {
+            lexer::TokenType type = current().getTokenType();
+
+            if (depth == 0 && (type == lexer::TokenType::RightBrace || StartsStatement(type))) break;
+
+            consume();
+
+            if (type == lexer::TokenType::LeftBrace) {
+                depth++;
+            } else if (type == lexer::TokenType::RightBrace) {
+                depth--;
+            } else if (type != lexer::TokenType::Semicolon) {
+                continue;
+            }
+
+            if (depth == 0 && current().getTokenType() != lexer::TokenType::ElseKeyword) break;
+        }
+
+        if (mPosition == failedAt && !isAtEnd() && current().getTokenType() != lexer::TokenType::RightBrace) consume();
     }
 
     int Parser::getBinaryOperatorPrecedence(lexer::TokenType tokenType) {
@@ -303,7 +421,7 @@ namespace bibblec::parser {
                     current().getEndLocation(),
                     std::format("expected global expression, got '{}{}{}'", fmt::bold, current().getText(), fmt::reset)
                 );
-                std::exit(1);
+                throw Abort();
         }
     }
 
@@ -410,7 +528,7 @@ namespace bibblec::parser {
                     current().getStartLocation(),
                     current().getEndLocation(),
                     std::format("Expected an expression. Got '{}{}{}'", fmt::bold, current().getText(), fmt::reset));
-                std::exit(1);
+                throw Abort();
         }
     }
 
@@ -435,6 +553,20 @@ namespace bibblec::parser {
         consume();
 
         return expression;
+    }
+
+    void Parser::parseBlockBody(std::vector<ASTNodePtr>& body) {
+        while (current().getTokenType() != lexer::TokenType::RightBrace && !isAtEnd()) {
+            size_t statementStart = mPosition;
+
+            try {
+                body.push_back(parseExpression());
+                expectToken(lexer::TokenType::Semicolon);
+                consume();
+            } catch (const Abort&) {
+                synchronizeBlock(statementStart);
+            }
+        }
     }
 
     Attribute Parser::parseAttribute() {
@@ -473,116 +605,124 @@ namespace bibblec::parser {
         std::vector<ClassField> fields;
         std::vector<ClassMethod> methods;
         while (current().getTokenType() != lexer::TokenType::RightBrace) {
-            lexer::SourceLocation memberStart = current().getStartLocation();
+            size_t memberStart = mPosition;
 
-            Type* type;
-            std::string name;
-            ClassMethod::Kind methodKind;
-            ClassMethod::Dispatch methodDispatch;
-
-            if (current().getTokenType() == lexer::TokenType::Identifier && current().getText() == className) { // constructor
-                type = Type::Get("void");
-                name = ".init";
-                methodKind = ClassMethod::Constructor;
-                methodDispatch = ClassMethod::NonVirtual;
-                consume();
-            } else if (current().getTokenType() == lexer::TokenType::Tilde) { // finalizer
-                consume();
-                expectToken(lexer::TokenType::Identifier);
-                if (current().getText() != className) {
-                    mDiag.reportCompilerError(current().getStartLocation(), current().getEndLocation(), "invalid finalizer declaration");
-                    std::exit(1);
-                }
-                consume();
-
-                type = Type::Get("void");
-                name = ".finalize";
-                methodKind = ClassMethod::Finalizer;
-                methodDispatch = ClassMethod::NonVirtual;
-            } else {
-                type = parseType();
-                expectToken(lexer::TokenType::Identifier);
-                name = consume().getText();
-                methodKind = ClassMethod::Normal;
-                methodDispatch = ClassMethod::Virtual; // TODO: figure out the virtual situation
+            try {
+                parseClassMember(className, classType, fields, methods);
+            } catch (const Abort&) {
+                synchronizeBlock(memberStart);
             }
-
-            if (current().getTokenType() != lexer::TokenType::LeftParen) {
-                expectToken(lexer::TokenType::Semicolon);
-                consume();
-
-                fields.emplace_back(type, std::move(name));
-                continue;
-            }
-
-            // method parsing from this point on
-
-            SourcePair memberSource;
-            memberSource.start = memberStart;
-
-            consume(); // (    already guaranteed to be a left paren because of the field block above
-
-            std::vector<FunctionArgument> arguments;
-            std::vector<Type*> argumentTypes;
-            while (current().getTokenType() != lexer::TokenType::RightParen) {
-                Type* argumentType = parseType();
-
-                expectToken(lexer::TokenType::Identifier);
-                std::string argumentName(consume().getText());
-
-                arguments.emplace_back(argumentType, std::move(argumentName));
-                argumentTypes.push_back(argumentType);
-
-                if (current().getTokenType() != lexer::TokenType::RightParen) {
-                    expectToken(lexer::TokenType::Comma);
-                    consume();
-                }
-            }
-            memberSource.end = consume().getEndLocation();
-
-            FunctionType* functionType = FunctionType::Create(type, std::move(argumentTypes));
-            std::vector<ASTNodePtr> body;
-
-            // if current is =, create return
-
-            expectToken(lexer::TokenType::LeftBrace);
-            consume();
-
-            scope::ScopePtr scope = std::make_unique<scope::Scope>(std::nullopt, mActiveScope);
-            mActiveScope = scope.get();
-
-            while (current().getTokenType() != lexer::TokenType::RightBrace) {
-                body.push_back(parseExpression());
-                expectToken(lexer::TokenType::Semicolon);
-                consume();
-            }
-
-            SourcePair blockEnd(current().getStartLocation(), current().getEndLocation());
-            consume();
-
-            mActiveScope = scope->getParent();
-
-            if (!mImportedModuleName.empty()) body.clear();
-
-            FunctionPtr impl = std::make_unique<Function>(
-                std::vector<Attribute>(), // TODO: method attributes
-                std::vector<lexer::Token>(),
-                classType,
-                std::move(name),
-                mImportedModuleName,
-                functionType,
-                std::move(arguments),
-                std::move(scope),
-                std::move(body),
-                memberSource,
-                blockEnd
-            );
-
-            methods.emplace_back(std::move(impl), methodKind, methodDispatch);
         }
         source.end = consume().getEndLocation();
 
         return std::make_unique<ClassDeclaration>(mActiveScope, std::move(attributes), std::move(className), mImportedModuleName, std::move(fields), std::move(methods), source);
+    }
+
+    void Parser::parseClassMember(const std::string& className, Type* classType, std::vector<ClassField>& fields, std::vector<ClassMethod>& methods) {
+        lexer::SourceLocation memberStart = current().getStartLocation();
+
+        Type* type;
+        std::string name;
+        ClassMethod::Kind methodKind;
+        ClassMethod::Dispatch methodDispatch;
+
+        if (current().getTokenType() == lexer::TokenType::Identifier && current().getText() == className) { // constructor
+            type = Type::Get("void");
+            name = ".init";
+            methodKind = ClassMethod::Constructor;
+            methodDispatch = ClassMethod::NonVirtual;
+            consume();
+        } else if (current().getTokenType() == lexer::TokenType::Tilde) { // finalizer
+            consume();
+            expectToken(lexer::TokenType::Identifier);
+            if (current().getText() != className) {
+                mDiag.reportCompilerError(current().getStartLocation(), current().getEndLocation(), "invalid finalizer declaration");
+                throw Abort();
+            }
+            consume();
+
+            type = Type::Get("void");
+            name = ".finalize";
+            methodKind = ClassMethod::Finalizer;
+            methodDispatch = ClassMethod::NonVirtual;
+        } else {
+            type = parseType();
+            expectToken(lexer::TokenType::Identifier);
+            name = consume().getText();
+            methodKind = ClassMethod::Normal;
+            methodDispatch = ClassMethod::Virtual; // TODO: figure out the virtual situation
+        }
+
+        if (current().getTokenType() != lexer::TokenType::LeftParen) {
+            expectToken(lexer::TokenType::Semicolon);
+            consume();
+
+            fields.emplace_back(type, std::move(name));
+            return;
+        }
+
+        // method parsing from this point on
+
+        SourcePair memberSource;
+        memberSource.start = memberStart;
+
+        consume(); // (    already guaranteed to be a left paren because of the field block above
+
+        std::vector<FunctionArgument> arguments;
+        std::vector<Type*> argumentTypes;
+        while (current().getTokenType() != lexer::TokenType::RightParen) {
+            Type* argumentType = parseType();
+
+            expectToken(lexer::TokenType::Identifier);
+            std::string argumentName(consume().getText());
+
+            arguments.emplace_back(argumentType, std::move(argumentName));
+            argumentTypes.push_back(argumentType);
+
+            if (current().getTokenType() != lexer::TokenType::RightParen) {
+                expectToken(lexer::TokenType::Comma);
+                consume();
+            }
+        }
+        memberSource.end = consume().getEndLocation();
+
+        FunctionType* functionType = FunctionType::Create(type, std::move(argumentTypes));
+        std::vector<ASTNodePtr> body;
+
+        // if current is =, create return
+
+        expectToken(lexer::TokenType::LeftBrace);
+        consume();
+
+        scope::ScopePtr scope = std::make_unique<scope::Scope>(std::nullopt, mActiveScope);
+
+        SourcePair blockEnd;
+        {
+            ScopeGuard guard(mActiveScope, scope.get());
+
+            parseBlockBody(body);
+
+            blockEnd = SourcePair(current().getStartLocation(), current().getEndLocation());
+            consume();
+        }
+
+        if (!mImportedModuleName.empty()) body.clear();
+
+        FunctionPtr impl = std::make_unique<Function>(
+            std::vector<Attribute>(), // TODO: method attributes
+            std::vector<lexer::Token>(),
+            classType,
+            std::move(name),
+            mImportedModuleName,
+            functionType,
+            std::move(arguments),
+            std::move(scope),
+            std::move(body),
+            memberSource,
+            blockEnd
+        );
+
+        methods.emplace_back(std::move(impl), methodKind, methodDispatch);
     }
 
     FunctionPtr Parser::parseFunction(std::vector<Attribute> attributes, lexer::SourceLocation sourceStart, std::vector<lexer::Token> modifierTokens, Type* returnType, Type* implType) {
@@ -617,30 +757,26 @@ namespace bibblec::parser {
         std::vector<ASTNodePtr> body;
 
         scope::ScopePtr scope = std::make_unique<scope::Scope>(std::nullopt, mActiveScope);
-        mActiveScope = scope.get();
 
         SourcePair blockEnd;
+        {
+            ScopeGuard guard(mActiveScope, scope.get());
 
-        // if current is equal, create return with parseExpression
+            // if current is equal, create return with parseExpression
 
-        if (current().getTokenType() == lexer::TokenType::Semicolon) {
-            blockEnd = {current().getStartLocation(), current().getEndLocation()};
-            consume();
-        } else {
-            expectToken(lexer::TokenType::LeftBrace);
-            consume();
+            if (current().getTokenType() == lexer::TokenType::Semicolon) {
+                blockEnd = {current().getStartLocation(), current().getEndLocation()};
+                consume();
+            } else {
+                expectToken(lexer::TokenType::LeftBrace);
+                consume();
 
-            while (current().getTokenType() != lexer::TokenType::RightBrace) {
-                body.push_back(parseExpression());
-                expectToken(lexer::TokenType::Semicolon);
+                parseBlockBody(body);
+
+                blockEnd = SourcePair(current().getStartLocation(), current().getEndLocation());
                 consume();
             }
-
-            blockEnd = {current().getStartLocation(), current().getEndLocation()};
-            consume();
         }
-
-        mActiveScope = scope->getParent();
 
         if (!mImportedModuleName.empty()) body.clear();
 
@@ -717,19 +853,15 @@ namespace bibblec::parser {
         source.start = consume().getStartLocation();
 
         scope::ScopePtr scope = std::make_unique<scope::Scope>(std::nullopt, mActiveScope);
-        mActiveScope = scope.get();
 
         std::vector<ASTNodePtr> body;
-        while (current().getTokenType() != lexer::TokenType::RightBrace) {
-            body.push_back(parseExpression());
-            expectToken(lexer::TokenType::Semicolon);
-            consume();
+        {
+            ScopeGuard guard(mActiveScope, scope.get());
+            parseBlockBody(body);
         }
         source.end = consume().getEndLocation();
 
         mTokens.insert(mTokens.begin() + mPosition, lexer::Token(";", lexer::TokenType::Semicolon, source.end, source.end));
-
-        mActiveScope = scope->getParent();
 
         return std::make_unique<CompoundStatement>(std::move(body), std::move(scope), source);
     }
