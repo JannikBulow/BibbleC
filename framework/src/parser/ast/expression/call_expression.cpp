@@ -22,8 +22,8 @@ namespace bibblec::parser {
 
     std::vector<ASTNode*> CallExpression::getChildren() {
         std::vector<ASTNode*> children;
+        children.reserve(mParameters.size() + 1);
         children.push_back(mCallee.get());
-        children.reserve(mParameters.size());
         for (auto& parameter : mParameters) {
             children.push_back(parameter.get());
         }
