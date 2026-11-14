@@ -14,6 +14,9 @@
 namespace bibblec::scope {
     class BIBBLEC_EXPORT Scope {
     public:
+        Scope(const Scope&) = delete;
+        Scope& operator=(const Scope&) = delete;
+
         template<class T>
         struct BaseIterator {
             T* current;

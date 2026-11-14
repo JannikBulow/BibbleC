@@ -123,6 +123,12 @@ source_group(TREE ${PROJECT_SOURCE_DIR} FILES ${SOURCES} ${HEADERS})
 add_library(BibbleC-framework-shared SHARED ${SOURCES} ${HEADERS})
 add_library(BibbleC-framework-static STATIC ${SOURCES} ${HEADERS})
 
+if(WIN32)
+    set_target_properties(BibbleC-framework-shared PROPERTIES
+            WINDOWS_EXPORT_ALL_SYMBOLS ON
+    )
+endif()
+
 generate_export_header(BibbleC-framework-shared
     EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/BibbleC/api.h
     EXPORT_MACRO_NAME BIBBLEC_EXPORT
