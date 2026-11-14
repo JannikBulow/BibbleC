@@ -29,10 +29,11 @@ namespace bibblec::parser {
     struct BIBBLEC_EXPORT FunctionArgument {
         Type* type;
         std::string name;
+        SourcePair source;
 
         scope::Symbol* symbol;
 
-        FunctionArgument(Type* type, std::string name);
+        FunctionArgument(Type* type, std::string name, SourcePair source);
     };
 
     class BIBBLEC_EXPORT Function : public ASTNode {

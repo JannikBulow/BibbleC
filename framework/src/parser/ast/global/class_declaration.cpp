@@ -42,7 +42,7 @@ namespace bibblec::parser {
         , mFields(std::move(fields))
         , mMethods(std::move(methods))
         , mSymbol(nullptr) {
-        mScope->addSymbol(std::make_unique<scope::Symbol>(mName, nullptr, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName));
+        mScope->addSymbol(std::make_unique<scope::Symbol>(mName, nullptr, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, getSource()));
         mSymbol = mScope->getLatestSymbol();
 
         if (Type* type = Type::Get(mName)) {

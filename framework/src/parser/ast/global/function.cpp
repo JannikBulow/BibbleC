@@ -11,9 +11,10 @@
 #include <functional>
 
 namespace bibblec::parser {
-    FunctionArgument::FunctionArgument(Type* type, std::string name)
+    FunctionArgument::FunctionArgument(Type* type, std::string name, SourcePair source)
         : type(type)
         , name(std::move(name))
+        , source(source)
         , symbol(nullptr) {}
 
     Function::Function(
@@ -207,7 +208,7 @@ namespace bibblec::parser {
 
     void Function::constructorImpl(FunctionType* type) {
         if (mImplType && mExternalModuleName.empty()) {
-            mArguments.insert(mArguments.begin(), {mImplType, "this"});
+            mArguments.insert(mArguments.begin(), {mImplType, "this", getSource()});
 
             auto argTypes = type->getArgumentTypes();
             argTypes.insert(argTypes.begin(), mImplType);
@@ -216,11 +217,11 @@ namespace bibblec::parser {
         }
 
         mOwnScope->setCurrentReturnType(type->getReturnType());
-        mScope->addSymbol(std::make_unique<scope::Symbol>(mName, type, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName));
+        mScope->addSymbol(std::make_unique<scope::Symbol>(mName, type, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, getSource()));
         mSymbol = mScope->getLatestSymbol();
 
         for (FunctionArgument& argument : mArguments) {
-            mOwnScope->addSymbol(std::make_unique<scope::Symbol>(argument.name, argument.type));
+            mOwnScope->addSymbol(std::make_unique<scope::Symbol>(argument.name, argument.type, "", argument.source));
             argument.symbol = mOwnScope->getLatestSymbol();
         }
     }

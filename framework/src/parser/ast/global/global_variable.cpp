@@ -9,7 +9,7 @@ namespace bibblec::parser {
         , mName(std::move(name))
         , mExternalModuleName(std::move(externalModuleName))
         , mInitialValue(std::move(initialValue)) {
-        mScope->addSymbol(std::make_unique<scope::Symbol>(mName, type, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName));
+        mScope->addSymbol(std::make_unique<scope::Symbol>(mName, type, mExternalModuleName.empty() ? std::string(mScope->getModuleName()) : mExternalModuleName, getSource()));
         mSymbol = mScope->getLatestSymbol();
         mSymbol->constant = constant;
     }

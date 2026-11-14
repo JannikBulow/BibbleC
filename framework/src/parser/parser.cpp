@@ -671,12 +671,16 @@ namespace bibblec::parser {
         std::vector<FunctionArgument> arguments;
         std::vector<Type*> argumentTypes;
         while (current().getTokenType() != lexer::TokenType::RightParen) {
+            SourcePair argumentSource;
+            argumentSource.start = current().getStartLocation();
+
             Type* argumentType = parseType();
 
             expectToken(lexer::TokenType::Identifier);
+            argumentSource.end = current().getEndLocation();
             std::string argumentName(consume().getText());
 
-            arguments.emplace_back(argumentType, std::move(argumentName));
+            arguments.emplace_back(argumentType, std::move(argumentName), argumentSource);
             argumentTypes.push_back(argumentType);
 
             if (current().getTokenType() != lexer::TokenType::RightParen) {
@@ -738,12 +742,15 @@ namespace bibblec::parser {
         std::vector<FunctionArgument> arguments;
         std::vector<Type*> argumentTypes;
         while (current().getTokenType() != lexer::TokenType::RightParen) {
+            SourcePair argumentSource;
+            argumentSource.start = current().getStartLocation();
             Type* type = parseType();
 
             expectToken(lexer::TokenType::Identifier);
+            argumentSource.end = current().getEndLocation();
             std::string argumentName(consume().getText());
 
-            arguments.emplace_back(type, std::move(argumentName));
+            arguments.emplace_back(type, std::move(argumentName), argumentSource);
             argumentTypes.push_back(type);
 
             if (current().getTokenType() != lexer::TokenType::RightParen) {

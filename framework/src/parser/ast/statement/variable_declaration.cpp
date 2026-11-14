@@ -7,7 +7,7 @@ namespace bibblec::parser {
         : ASTNode(scope, source, type)
         , mName(std::move(name))
         , mInitialValue(std::move(initialValue)) {
-        mScope->addSymbol(std::make_unique<scope::Symbol>(mName, mType));
+        mScope->addSymbol(std::make_unique<scope::Symbol>(mName, mType, "", getSource()));
         mSymbol = mScope->getLatestSymbol();
     }
 
