@@ -41,10 +41,10 @@ namespace bibblec {
 
         class BIBBLEC_EXPORT Diagnostics {
         public:
+            Diagnostics(std::ostream& errorStream, std::ostream& warningStream);
+
             Diagnostics(const Diagnostics&) = delete;
             Diagnostics& operator=(const Diagnostics&) = delete;
-
-            Diagnostics(std::ostream& errorStream, std::ostream& warningStream);
 
             bool hadErrors() const { return mErrorCount > 0; }
 

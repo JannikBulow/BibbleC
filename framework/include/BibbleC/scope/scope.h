@@ -14,9 +14,6 @@
 namespace bibblec::scope {
     class BIBBLEC_EXPORT Scope {
     public:
-        Scope(const Scope&) = delete;
-        Scope& operator=(const Scope&) = delete;
-
         template<class T>
         struct BaseIterator {
             T* current;
@@ -35,6 +32,9 @@ namespace bibblec::scope {
         using ConstIterator = BaseIterator<const Scope>;
 
         explicit Scope(std::optional<std::string> moduleName = std::nullopt, Scope* parent = nullptr);
+
+        Scope(const Scope&) = delete;
+        Scope& operator=(const Scope&) = delete;
 
         Iterator begin() { return this; }
         Iterator end() { return nullptr; }
