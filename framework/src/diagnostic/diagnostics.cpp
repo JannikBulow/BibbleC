@@ -47,8 +47,6 @@ namespace bibblec::diagnostic {
         unsigned int lineStart = getLinePosition(text, start.line - 1);
         unsigned int lineEnd = getLinePosition(text, end.line) - 1;
 
-        end.position += 1;
-
         std::string before = std::string(text.substr(lineStart, start.position - lineStart));
         std::string_view error = text.substr(start.position, end.position - start.position);
         std::string_view after = text.substr(end.position, lineEnd - end.position);
@@ -76,8 +74,6 @@ namespace bibblec::diagnostic {
 
         unsigned int lineStart = getLinePosition(text, start.line - 1);
         unsigned int lineEnd = getLinePosition(text, end.line) - 1;
-
-        end.position += 1;
 
         std::string_view before = text.substr(lineStart, start.position - lineStart);
         std::string_view error = text.substr(start.position, end.position - start.position);
