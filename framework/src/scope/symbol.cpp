@@ -5,10 +5,11 @@
 #include <algorithm>
 
 namespace bibblec::scope {
-    Symbol::Symbol(std::string name, Type* type, std::string module)
+    Symbol::Symbol(std::string name, Type* type, std::string module, SourcePair declarationSource)
         : module(std::move(module))
         , name(std::move(name))
-        , type(type) {}
+        , type(type)
+        , declarationSource(declarationSource) {}
 
     SymbolValue* Symbol::getLatestValue(bibblir::BasicBlock* bb) {
         SymbolValue* ret = getLatestValueImpl(bb);

@@ -3,6 +3,8 @@
 #ifndef BIBBLEC_SCOPE_SYMBOL_H
 #define BIBBLEC_SCOPE_SYMBOL_H
 
+#include "BibbleC/debug/source_pair.h"
+
 #include "BibbleC/type/type.h"
 
 #include "BibbleC/api.h"
@@ -30,7 +32,9 @@ namespace bibblec::scope {
         bool removed = false;
         bool constant = false;
 
-        Symbol(std::string name, Type* type, std::string module = "");
+        SourcePair declarationSource;
+
+        Symbol(std::string name, Type* type, std::string module = "", SourcePair declarationSource = {});
 
         SymbolValue* getLatestValue(bibblir::BasicBlock* bb = nullptr);
         SymbolValue* getLatestValueX(bibblir::BasicBlock* bb);
