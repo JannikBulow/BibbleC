@@ -15,6 +15,9 @@ namespace bibblec {
     public:
         explicit Compiler(diagnostic::Diagnostics& diag);
 
+        Compiler(const Compiler&) = delete;
+        Compiler& operator=(const Compiler&) = delete;
+
         void addFile(std::filesystem::path inputFile, std::filesystem::path outputFile);
 
         void compile();

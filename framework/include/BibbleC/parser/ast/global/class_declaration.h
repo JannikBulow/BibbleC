@@ -41,6 +41,9 @@ namespace bibblec::parser {
 
     class BIBBLEC_EXPORT ClassDeclaration : public ASTNode {
     public:
+        ClassDeclaration(const ClassDeclaration&) = delete;
+        ClassDeclaration& operator=(const ClassDeclaration&) = delete;
+
         ClassDeclaration(scope::Scope* scope, std::vector<Attribute> attributes, std::string name, std::string externalModuleName, std::vector<ClassField> fields, std::vector<ClassMethod> methods, SourcePair source);
 
         std::vector<ASTNode*> getChildren() override;
