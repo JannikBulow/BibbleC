@@ -29,7 +29,6 @@ namespace bibblec::scope {
         Type* type;
         std::vector<SymbolValue> values;
 
-        bool removed = false;
         bool constant = false;
 
         SourcePair declarationSource;
