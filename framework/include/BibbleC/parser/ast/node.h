@@ -36,6 +36,7 @@ namespace bibblec::parser {
 
         Type* getType() const { return mType; }
         const SourcePair& getSource() const { return mSource; }
+        scope::Scope* getScope() const { return mScope; }
 
         virtual std::vector<ASTNode*> getChildren() { return {}; }
 
