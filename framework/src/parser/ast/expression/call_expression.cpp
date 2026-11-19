@@ -20,6 +20,10 @@ namespace bibblec::parser {
         , mIsVirtualMethod(false)
         , mBestViableFunction(nullptr) {}
 
+    ASTNode* CallExpression::getCallee() const {
+        return mCallee.get();
+    }
+
     std::vector<ASTNode*> CallExpression::getChildren() {
         std::vector<ASTNode*> children;
         children.reserve(mParameters.size() + 1);

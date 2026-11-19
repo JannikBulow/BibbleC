@@ -10,6 +10,10 @@ namespace bibblec::parser {
     public:
         CallExpression(scope::Scope* scope, ASTNodePtr callee, std::vector<ASTNodePtr> parameters, SourcePair source);
 
+        ASTNode* getCallee() const;
+
+        scope::Symbol* getBestViableFunction(diagnostic::Diagnostics& diag);
+
         std::vector<ASTNode*> getChildren() override;
 
         bibblir::Value* codegen(bibblir::IRBuilder& builder, bibblir::Module& module, diagnostic::Diagnostics& diag) override;
@@ -23,8 +27,6 @@ namespace bibblec::parser {
         bool mIsMemberFunction;
         bool mIsVirtualMethod;
         scope::Symbol* mBestViableFunction;
-
-        scope::Symbol* getBestViableFunction(diagnostic::Diagnostics& diag);
     };
 
     using CallExpressionPtr = std::unique_ptr<CallExpression>;
