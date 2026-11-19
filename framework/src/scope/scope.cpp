@@ -2,6 +2,19 @@
 
 #include "BibbleC/scope/scope.h"
 
+#include <unordered_set>
+
+namespace std {
+    template<class A, class B>
+    struct hash<std::pair<A, B>> {
+        using transparent = void;
+
+        size_t operator()(const std::pair<A, B>& value) const noexcept {
+            return std::hash<A>()(value.first) ^ std::hash<B>()(value.second);
+        }
+    };
+}
+
 namespace bibblec::scope {
     static bool IsVisibleUnqualified(const Symbol& symbol, std::string_view currentModule) {
         return symbol.module.empty() || symbol.module == currentModule;
@@ -102,6 +115,26 @@ namespace bibblec::scope {
 
     void Scope::addSymbol(SymbolPtr symbol) {
         mSymbols.push_back(std::move(symbol));
+    }
+
+    std::vector<Symbol*> Scope::getVisibleSymbols() const {
+        std::vector<Symbol*> result;
+        std::unordered_set<std::pair<std::string, std::string>> shadowedNames;
+
+        for (const Scope& scope : *this) {
+            result.reserve(result.size() + scope.mSymbols.size());
+
+            for (const SymbolPtr& symbol : scope.mSymbols) {
+                std::pair<std::string, std::string> key(symbol->module, symbol->name);
+
+                if (shadowedNames.contains(key)) continue;
+
+                result.push_back(symbol.get());
+                shadowedNames.insert(std::move(key));
+            }
+        }
+
+        return result;
     }
 
     Type* Scope::getCurrentReturnType() const {
